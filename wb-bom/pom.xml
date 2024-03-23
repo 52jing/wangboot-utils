@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>wangboot-utils</artifactId>
+        <groupId>wang.52jing</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>wb-bom</artifactId>
+
+    <name>${project.artifactId}</name>
+    <description>BOM 统一依赖管理</description>
+
+    <packaging>pom</packaging>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring依赖 -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- SpringBoot依赖 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- hutool工具类 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-bom</artifactId>
+                <version>${hutool.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- 阿里数据库连接池 -->
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid-spring-boot-starter</artifactId>
+                <version>${druid.version}</version>
+            </dependency>
+            <!-- 运维管理 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <!-- Redis驱动包 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-data-redis</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <!-- 日志处理 -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>${logback.encoder.version}</version>
+            </dependency>
+            <!-- wangboot-utils -->
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-auth</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-cache</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-captcha</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-crypto</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-errorcode</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-reliability</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-test</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-utils</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-core-web</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-model-dataauthority</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-model-entity</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-model-flex</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>wang.52jing</groupId>
+                <artifactId>wb-spring-boot-starter</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-auth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-captcha</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-crypto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-errorcode</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-reliability</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-test</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-utils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-model-dataauthority</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-model-entity</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-model-flex</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-spring-boot-starter</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>
