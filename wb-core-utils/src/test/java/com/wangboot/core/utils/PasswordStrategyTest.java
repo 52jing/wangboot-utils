@@ -71,7 +71,8 @@ public class PasswordStrategyTest {
   @Test
   public void testPasswordStrategyManager() {
     PasswordStrategyManager manager = new PasswordStrategyManager();
-    manager.initStrategy(8, true, true, true, true);
+    manager.addPasswordStrategy(new MinimumLength(8));
+    manager.addPasswordStrategy(new MultiPattern());
     Assertions.assertTrue(manager.checkStrategies("qweRTY123-"));
     Assertions.assertFalse(manager.checkStrategies("qweRTY123"));
     Assertions.assertFalse(manager.checkStrategies("qweRTY-_*&"));

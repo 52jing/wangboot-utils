@@ -52,7 +52,7 @@ public class FlexRestHelper {
         wrapper.or(
             w -> {
               for (String field : groups) {
-                w.eq(StrUtils.toUnderScoreCase(field), bean.get(field));
+                w.eq(field, bean.get(StrUtils.toCamelCase(field, false)));
               }
             });
       }

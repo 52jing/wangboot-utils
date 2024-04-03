@@ -1,7 +1,6 @@
 package com.wangboot.core.web;
 
 import cn.hutool.core.util.RandomUtil;
-import com.wangboot.core.web.param.ParamUtils;
 import com.wangboot.core.web.param.impl.EnvFileParamConfig;
 import com.wangboot.core.web.utils.ResponseUtils;
 import java.util.List;
@@ -9,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
-import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -47,52 +45,22 @@ public class WebTest {
     Assertions.assertNull(paramConfig.getParamConfig(""));
     paramConfig = new EnvFileParamConfig(environment, p1);
     Assertions.assertEquals(v2, paramConfig.getParamConfig(k1));
-    // ParamUtils
-    String out = ParamUtils.convertStrListToParamValue(Lists.list("a", "b", "c"));
-    Assertions.assertEquals("a,b,c", out);
-    List<String> lsstr = ParamUtils.getStrList(out);
-    Assertions.assertEquals(3, lsstr.size());
-    out = ParamUtils.convertIntListToParamValue(Lists.list(1L, 2L, 3L));
-    Assertions.assertEquals("1,2,3", out);
-    List<Long> lslong = ParamUtils.getIntList(out);
-    Assertions.assertEquals(3, lslong.size());
-    out = ParamUtils.convertFloatListToParamValue(Lists.list(1.1f, 2.1f));
-    Assertions.assertEquals("1.1,2.1", out);
-    List<Float> lsfloat = ParamUtils.getFloatList(out);
-    Assertions.assertEquals(2, lsfloat.size());
-    out = ParamUtils.convertBoolListToParamValue(Lists.list(true, false));
-    Assertions.assertEquals("true,false", out);
-    List<Boolean> lsbool = ParamUtils.getBoolList(out);
-    Assertions.assertEquals(2, lsbool.size());
-    Assertions.assertNull(ParamUtils.getInt(null, 1));
-    Assertions.assertEquals(1, ParamUtils.getInt("1", 0));
-    Assertions.assertEquals(2, ParamUtils.getInt("2"));
-    Assertions.assertEquals(3, ParamUtils.getInt("a", 3));
-    Assertions.assertNull(ParamUtils.getInt("a"));
-    Assertions.assertEquals(1, ParamUtils.getIntPrimitive("1", 0));
-    Assertions.assertEquals(0, ParamUtils.getIntPrimitive("a", 0));
-    Assertions.assertNull(ParamUtils.getInt(null, 1));
-    Assertions.assertEquals(1, ParamUtils.getLong("1", 0L));
-    Assertions.assertEquals(2, ParamUtils.getLong("2"));
-    Assertions.assertEquals(3, ParamUtils.getLong("a", 3L));
-    Assertions.assertNull(ParamUtils.getLong("a"));
-    Assertions.assertEquals(1, ParamUtils.getLongPrimitive("1", 0L));
-    Assertions.assertEquals(0, ParamUtils.getLongPrimitive("a", 0L));
-    Assertions.assertNull(ParamUtils.getLong(null, 0L));
-    Assertions.assertEquals(1.1f, ParamUtils.getFloat("1.1", 0f));
-    Assertions.assertEquals(2.2f, ParamUtils.getFloat("2.2"));
-    Assertions.assertEquals(3f, ParamUtils.getFloat("a", 3f));
-    Assertions.assertNull(ParamUtils.getFloat("a"));
-    Assertions.assertEquals(1.0f, ParamUtils.getFloatPrimitive("1.0", 0.1f));
-    Assertions.assertEquals(0.1f, ParamUtils.getFloatPrimitive("a", 0.1f));
-    Assertions.assertNull(ParamUtils.getFloat(null, 0f));
-    Assertions.assertEquals(true, ParamUtils.getBoolean("true", false));
-    Assertions.assertEquals(false, ParamUtils.getBoolean("false"));
-    Assertions.assertEquals(false, ParamUtils.getBoolean("a", false));
-    Assertions.assertNull(ParamUtils.getBoolean(null));
-    Assertions.assertTrue(ParamUtils.getBooleanPrimitive("true", false));
-    Assertions.assertFalse(ParamUtils.getBooleanPrimitive("a", false));
-    Assertions.assertNull(ParamUtils.getBoolean(null, false));
+    // convert
+    List<String> out1 = paramConfig.getStrList("a,b,c");
+    Assertions.assertEquals(3, out1.size());
+    Assertions.assertEquals("a", out1.get(0));
+    List<Integer> out2 = paramConfig.getIntList("1,2");
+    Assertions.assertEquals(2, out2.size());
+    Assertions.assertEquals(1, out2.get(0));
+    List<Long> out3 = paramConfig.getLongList("1,2,3");
+    Assertions.assertEquals(3, out3.size());
+    Assertions.assertEquals(1, out3.get(0));
+    List<Float> out4 = paramConfig.getFloatList("1.2,2.5");
+    Assertions.assertEquals(2, out4.size());
+    Assertions.assertEquals(1.2f, out4.get(0));
+    List<Boolean> out5 = paramConfig.getBooleanList("true,false");
+    Assertions.assertEquals(2, out5.size());
+    Assertions.assertEquals(true, out5.get(0));
   }
 
   @Test

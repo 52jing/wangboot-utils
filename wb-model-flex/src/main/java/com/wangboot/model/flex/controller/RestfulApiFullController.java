@@ -55,12 +55,14 @@ public abstract class RestfulApiFullController<T, S extends IRestfulService<T>>
   }
 
   @GetMapping
+  @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_VIEW)
   @NonNull
   public ResponseEntity<?> listApi() {
     return this.listPageResponse();
   }
 
   @GetMapping("/{id}")
+  @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_VIEW)
   @NonNull
   public ResponseEntity<?> detailApi(@PathVariable Serializable id) {
     return this.detailResponse(id);

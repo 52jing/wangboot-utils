@@ -28,12 +28,6 @@ public class UserEventLog {
   @NonNull private LogStatus status;
   /** 登录用户 */
   @Nullable private ILoginUser loginUser;
-  /** 来源IP */
-  private String ip;
-  /** 用户客户端 */
-  private String ua;
   /** 消息 */
   private String message;
-  /** 创建人ID */
-  private String createdBy;
 }

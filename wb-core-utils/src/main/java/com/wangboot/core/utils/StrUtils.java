@@ -1,10 +1,10 @@
 package com.wangboot.core.utils;
 
+import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 字符串工具类
@@ -102,6 +102,119 @@ public class StrUtils {
       i = j;
     }
     return res;
+  }
+
+  public static String joinStrList(List<String> data, String del) {
+    if (Objects.isNull(data)) {
+      return "";
+    }
+    return String.join(del, data);
+  }
+
+  public static List<String> splitStrList(String value, String del) {
+    if (Objects.isNull(value) || value.length() == 0) {
+      return Collections.emptyList();
+    }
+    return Arrays.asList(value.split(del));
+  }
+
+  public static <T> String joinList(List<T> data, String del) {
+    if (Objects.isNull(data)) {
+      return "";
+    }
+    return data.stream().map(String::valueOf).collect(Collectors.joining(del));
+  }
+
+  public static List<Long> splitLongList(String value, String del) {
+    if (Objects.isNull(value) || value.length() == 0) {
+      return Collections.emptyList();
+    }
+    return Arrays.stream(value.split(del)).map(Long::valueOf).collect(Collectors.toList());
+  }
+
+  public static List<Integer> splitIntList(String value, String del) {
+    if (Objects.isNull(value) || value.length() == 0) {
+      return Collections.emptyList();
+    }
+    return Arrays.stream(value.split(del)).map(Integer::valueOf).collect(Collectors.toList());
+  }
+
+  public static List<Float> splitFloatList(String value, String del) {
+    if (Objects.isNull(value) || value.length() == 0) {
+      return Collections.emptyList();
+    }
+    return Arrays.stream(value.split(del)).map(Float::valueOf).collect(Collectors.toList());
+  }
+
+  public static List<Boolean> splitBooleanList(String value, String del) {
+    if (Objects.isNull(value) || value.length() == 0) {
+      return Collections.emptyList();
+    }
+    return Arrays.stream(value.split(del)).map(Boolean::valueOf).collect(Collectors.toList());
+  }
+
+  public static Integer getInteger(String value, Integer defaultVal) {
+    if (Objects.isNull(value)) {
+      return defaultVal;
+    }
+    return Convert.toInt(value, defaultVal);
+  }
+
+  public static Integer getInteger(String value) {
+    return getInteger(value, null);
+  }
+
+  public static int getIntPrimitive(String value, int defaultVal) {
+    Integer v = getInteger(value);
+    return Objects.isNull(v) ? defaultVal : v;
+  }
+
+  public static Long getLong(String value, Long defaultVal) {
+    if (Objects.isNull(value)) {
+      return null;
+    }
+    return Convert.toLong(value, defaultVal);
+  }
+
+  public static Long getLong(String value) {
+    return getLong(value, null);
+  }
+
+  public static long getLongPrimitive(String value, long defaultVal) {
+    Long v = getLong(value);
+    return Objects.isNull(v) ? defaultVal : v;
+  }
+
+  public static Float getFloat(String value, Float defaultVal) {
+    if (Objects.isNull(value)) {
+      return null;
+    }
+    return Convert.toFloat(value, defaultVal);
+  }
+
+  public static Float getFloat(String value) {
+    return getFloat(value, null);
+  }
+
+  public static float getFloatPrimitive(String value, float defaultVal) {
+    Float v = getFloat(value);
+    return Objects.isNull(v) ? defaultVal : v;
+  }
+
+  public static Boolean getBoolean(String value, Boolean defaultVal) {
+    if (Objects.isNull(value)) {
+      return null;
+    }
+    return Convert.toBool(value, defaultVal);
+  }
+
+  public static Boolean getBoolean(String value) {
+    return getBoolean(value, null);
+  }
+
+  public static boolean getBooleanPrimitive(String value, boolean defaultVal) {
+    Boolean v = getBoolean(value);
+    return Objects.isNull(v) ? defaultVal : v;
   }
 
   /**

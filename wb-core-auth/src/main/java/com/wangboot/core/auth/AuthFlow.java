@@ -428,9 +428,6 @@ public class AuthFlow implements IEventPublisher {
                 .loginUser(loginUser)
                 .body(body)
                 .message(Optional.ofNullable(message).orElse(""))
-                .ip(ServletUtils.getRemoteIp(getRequest()))
-                .ua(ServletUtils.getUserAgent(getRequest()))
-                .createdBy(getUserId())
                 .build(),
             getRequest()));
   }

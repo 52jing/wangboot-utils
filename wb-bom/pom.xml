@@ -54,6 +54,12 @@
                 <artifactId>spring-boot-starter-actuator</artifactId>
                 <version>${spring.boot.version}</version>
             </dependency>
+            <!-- MyBatis Flex -->
+            <dependency>
+                <groupId>com.mybatis-flex</groupId>
+                <artifactId>mybatis-flex-spring-boot-starter</artifactId>
+                <version>${mybatis.flex.version}</version>
+            </dependency>
             <!-- Redis驱动包 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>

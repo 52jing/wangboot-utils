@@ -42,8 +42,9 @@ public class BaseErrorCodeHandler {
 
   /** 统一错误码响应 翻译错误信息 */
   @NonNull
-  protected ResponseEntity<ErrorBody> toResponse(@NonNull IErrorCode errorCode, String msg) {
-    return toResponse(errorCode.getStatusCode(), errorCode.getErrCode(), msg);
+  protected ResponseEntity<ErrorBody> toResponse(@NonNull IErrorCode errorCode, Object... args) {
+    return toResponse(
+        errorCode.getStatusCode(), errorCode.getErrCode(), errorCode.getErrMsg(), args);
   }
 
   /** 统一异常处理 */

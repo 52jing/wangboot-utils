@@ -1,5 +1,14 @@
 package com.wangboot.starter.autoconfiguration;
 
+import com.wangboot.core.auth.authentication.IAuthenticator;
+import com.wangboot.core.auth.authentication.authenticator.TokenAuthenticator;
+import com.wangboot.core.auth.authorization.IAuthorizerService;
+import com.wangboot.core.auth.frontend.IFrontendService;
+import com.wangboot.core.auth.token.ITokenManager;
+import com.wangboot.core.auth.token.jwt.JwtTokenManager;
+import com.wangboot.core.auth.user.IUserService;
+import com.wangboot.core.reliability.blacklist.CacheBlacklistHolder;
+import com.wangboot.core.reliability.blacklist.IBlacklistHolder;
 import com.wangboot.core.utils.password.PasswordStrategyManager;
 import com.wangboot.core.web.exception.NotSupportedComponentException;
 import java.util.Objects;
@@ -45,13 +54,35 @@ public class WbAutoConfiguration {
     return new PasswordStrategyManager();
   }
 
+  /** 令牌管理器 */
+  @Bean
+  @ConditionalOnMissingBean(ITokenManager.class)
+  public ITokenManager tokenManager() {
+    return new JwtTokenManager(
+        this.wbProperties.getSecret(),
+        this.wbProperties.getNamespace(),
+        this.wbProperties.getAuth().getExpires(),
+        this.wbProperties.getAuth().getRefreshExpires());
+  }
+
+  /** 认证验证器 */
+  @Bean
+  @ConditionalOnMissingBean(IAuthenticator.class)
+  public IAuthenticator authenticator(
+      IUserService userService,
+      IFrontendService frontendService,
+      IAuthorizerService authorizerService) {
+    return new TokenAuthenticator(userService, frontendService, authorizerService);
+  }
+
   /** 黑名单管理器 */
-  //  @Bean
-  //  @ConditionalOnMissingBean(IBlacklistHolder.class)
-  //  public IBlacklistHolder blacklistHolder() {
-  //    return new CacheBlacklistHolder(
-  //      config.getAuthConfig().getBlacklistPrefix(), config.getAuthConfig().getBlacklistTtl());
-  //  }
+  @Bean
+  @ConditionalOnMissingBean(IBlacklistHolder.class)
+  public IBlacklistHolder blacklistHolder() {
+    return new CacheBlacklistHolder(
+        this.wbProperties.getAuth().getBlacklistPrefix(),
+        this.wbProperties.getAuth().getBlacklistTtl());
+  }
 
   /** 登录计数器 */
   //  @Bean

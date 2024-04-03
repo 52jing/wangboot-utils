@@ -1,5 +1,7 @@
 package com.wangboot.model.flex.controller;
 
+import com.wangboot.core.auth.annotation.RestPermissionAction;
+import com.wangboot.core.auth.authorization.resource.ApiResource;
 import com.wangboot.model.entity.IRestfulService;
 import com.wangboot.model.entity.utils.EntityUtils;
 import com.wangboot.model.flex.IdListBody;
@@ -44,24 +46,28 @@ public abstract class RestfulApiReadWriteController<
   }
 
   @GetMapping
+  @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_VIEW)
   @NonNull
   public ResponseEntity<?> listApi() {
     return this.listPageResponse();
   }
 
   @GetMapping("/{id}")
+  @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_VIEW)
   @NonNull
   public ResponseEntity<?> detailApi(@PathVariable Serializable id) {
     return this.detailResponse(id);
   }
 
   @PostMapping
+  @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_CREATE)
   @NonNull
   public ResponseEntity<?> createApi(@Validated @RequestBody W obj) {
     return this.createDataResponse(obj);
   }
 
   @PutMapping("/{id}")
+  @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_UPDATE)
   @NonNull
   public ResponseEntity<?> updateApi(@PathVariable Serializable id, @Validated @RequestBody W obj) {
     EntityUtils.setEntityIdentifier(obj, id);
@@ -69,12 +75,14 @@ public abstract class RestfulApiReadWriteController<
   }
 
   @DeleteMapping("/{id}")
+  @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_DELETE)
   @NonNull
   public ResponseEntity<?> removeApi(@PathVariable Serializable id) {
     return this.deleteDataByIdResponse(id);
   }
 
   @DeleteMapping
+  @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_DELETE)
   @NonNull
   public ResponseEntity<?> batchRemoveApi(
       @Validated @RequestBody IdListBody<? extends Serializable> ids) {

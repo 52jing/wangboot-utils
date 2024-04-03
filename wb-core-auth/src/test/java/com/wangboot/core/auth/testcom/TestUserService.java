@@ -83,7 +83,7 @@ public class TestUserService implements IUserService, IAuthorizerService {
   }
 
   @Override
-  public boolean setPassword(IUserModel user, String newPassword) {
+  public boolean setPassword(IUserModel user, String newPassword, boolean passwordChangeFlag) {
     return true;
   }
 

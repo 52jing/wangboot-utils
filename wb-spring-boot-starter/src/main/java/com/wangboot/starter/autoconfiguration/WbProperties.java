@@ -30,6 +30,12 @@ public class WbProperties {
   /** 调试开关 */
   private boolean debug = false;
 
+  /** 维护中标记 */
+  private boolean inMaintenance = false;
+
+  /** 维护通知 */
+  private String maintenanceNotice = "";
+
   /** 时区 */
   private String timezone = "UTC";
 

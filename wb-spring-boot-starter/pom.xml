@@ -38,6 +38,18 @@
 
         <dependency>
             <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-auth</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>wang.52jing</groupId>
+            <artifactId>wb-core-reliability</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>wang.52jing</groupId>
             <artifactId>wb-core-web</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

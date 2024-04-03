@@ -18,7 +18,7 @@ public interface IUserService {
   IUserModel getUserModelById(String id);
 
   /** 设置用户密码 */
-  boolean setPassword(@Nullable IUserModel user, String newPwd);
+  boolean setPassword(@Nullable IUserModel user, String newPwd, boolean passwordChangeFlag);
 
   /** 验证用户密码 */
   boolean verifyPassword(@Nullable IUserModel userModel, String pwd);
