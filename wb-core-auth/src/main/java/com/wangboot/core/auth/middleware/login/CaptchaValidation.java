@@ -9,6 +9,7 @@ import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.lang.NonNull;
+import org.springframework.util.StringUtils;
 
 /**
  * 验证码检查
@@ -31,10 +32,17 @@ public class CaptchaValidation implements ILoginMiddleware {
   }
 
   private boolean checkCaptcha(String captchaType, String captcha, String uuid) {
+    if (!StringUtils.hasText(captchaType)
+        || !StringUtils.hasText(captcha)
+        || !StringUtils.hasText(uuid)) {
+      // 未提供验证码类型或验证码或uuid则不通过
+      return false;
+    }
     if (Objects.nonNull(this.checkTypes)
         && Arrays.stream(this.checkTypes).anyMatch(t -> t.equalsIgnoreCase(captchaType))) {
       return CaptchaProcessorHolder.verifyCaptcha(captchaType, captcha, uuid);
+    } else {
+      return true;
     }
-    return true;
   }
 }

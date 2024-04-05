@@ -1,8 +1,11 @@
 package com.wangboot.core.captcha;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
@@ -54,5 +57,21 @@ public class CaptchaProcessorHolder {
       return processor.generate(uuid);
     }
     return null;
+  }
+
+  /** 发送验证码 */
+  @NonNull
+  public static Map<String, String> send(String type, @Nullable ICaptchaData captchaData) {
+    ICaptchaProcessor processor = getProcessor(type);
+    if (Objects.nonNull(processor) && Objects.nonNull(captchaData)) {
+      return processor.send(captchaData);
+    }
+    return new HashMap<>();
+  }
+
+  /** 生成并发送验证码 */
+  @NonNull
+  public static Map<String, String> generateAndSend(String type, String uuid) {
+    return send(type, generateCaptcha(type, uuid));
   }
 }

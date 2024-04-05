@@ -1,5 +1,7 @@
 package com.wangboot.starter.autoconfiguration;
 
+import cn.hutool.captcha.generator.CodeGenerator;
+import cn.hutool.captcha.generator.RandomGenerator;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -356,5 +358,6 @@ public class WbProperties {
   @Data
   public static class Components {
     private Class<? extends PasswordEncoder> passwordEncoderClass = BCryptPasswordEncoder.class;
+    private CodeGenerator captchaCodeGenerator = new RandomGenerator(4);
   }
 }
