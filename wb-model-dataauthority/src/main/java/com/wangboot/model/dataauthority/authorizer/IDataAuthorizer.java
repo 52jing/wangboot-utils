@@ -15,37 +15,23 @@ import org.springframework.lang.Nullable;
  */
 public interface IDataAuthorizer extends Serializable {
 
-  /** 是否具有所有数据权限 */
-  default boolean hasAllAuthorities() {
-    return false;
-  }
-
   /** 是否授权访问数据 */
-  boolean authorize(@Nullable Object data);
+  boolean hasDataAuthority(@Nullable Object object);
 
-  /** 是否授权访问所有数据 */
-  default boolean authorizeAll(@Nullable Collection<?> data) {
-    if (this.hasAllAuthorities()) {
-      return true;
-    }
-    if (Objects.isNull(data)) {
-      return false;
-    }
-    if (data.isEmpty()) {
-      // 空数据集
-      return true;
-    }
-    for (Object d : data) {
-      if (!this.authorize(d)) {
-        return false;
-      }
-    }
-    return true;
-  }
+  /** 获取字段 */
+  String getField();
 
   /** 获取数据权限集合 */
   @NonNull
   default Collection<? extends IAuthorizationResource> getAuthorities() {
     return Collections.emptyList();
+  }
+
+  /** 是否授权访问数据 */
+  default boolean hasDataAuthorities(@Nullable Collection<Object> objects) {
+    if (Objects.isNull(objects)) {
+      return false;
+    }
+    return objects.stream().allMatch(this::hasDataAuthority);
   }
 }

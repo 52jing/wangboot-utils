@@ -7,7 +7,6 @@ import com.wangboot.core.web.response.DetailBody;
 import com.wangboot.core.web.utils.ResponseUtils;
 import com.wangboot.model.entity.IRestfulService;
 import com.wangboot.model.entity.event.OperationEventType;
-import com.wangboot.model.entity.request.DeletionPolicy;
 import com.wangboot.model.entity.utils.EntityUtils;
 import java.io.Serializable;
 import java.util.Collection;
@@ -32,16 +31,6 @@ public interface IRestfulWriteController<T> extends IRestfulController {
   @NonNull
   default Class<T> getWriteEntityClass() {
     return getWriteService().getEntityClass();
-  }
-
-  /**
-   * 配置方法<br>
-   * 获取删除策略
-   *
-   * @return 删除策略
-   */
-  default DeletionPolicy getDeletionPolicy() {
-    return DeletionPolicy.DO_NOTHING;
   }
 
   /**
@@ -138,7 +127,7 @@ public interface IRestfulWriteController<T> extends IRestfulController {
         id.toString(),
         null);
     // 执行删除
-    boolean ret = getWriteService().deleteObjectById(id, getDeletionPolicy());
+    boolean ret = getWriteService().deleteObjectById(id);
     if (ret) {
       // 发布删除操作事件
       this.publishOperationEvent(
@@ -180,7 +169,7 @@ public interface IRestfulWriteController<T> extends IRestfulController {
                 i.toString(),
                 null));
     // 执行删除
-    boolean ret = getWriteService().batchDeleteObjectsByIds(ids, getDeletionPolicy());
+    boolean ret = getWriteService().batchDeleteObjectsByIds(ids);
     if (ret) {
       // 发布删除操作事件
       ids.forEach(

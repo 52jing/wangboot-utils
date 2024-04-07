@@ -5,9 +5,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.core.service.IService;
 import com.wangboot.core.utils.ObjectUtils;
 import com.wangboot.core.web.response.ListBody;
-import com.wangboot.model.dataauthority.DataAuthority;
 import com.wangboot.model.dataauthority.authorizer.IDataAuthorizer;
-import com.wangboot.model.dataauthority.utils.DataAuthorityUtils;
 import com.wangboot.model.entity.FieldConstants;
 import com.wangboot.model.entity.IRestfulService;
 import com.wangboot.model.entity.IUniqueEntity;
@@ -33,7 +31,7 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
   @Override
   @NonNull
   default Class<T> getEntityClass() {
-    return ObjectUtils.getTypeArgumentClass(this.getClass().getGenericSuperclass(), 0);
+    return ObjectUtils.getTypeArgumentClass(this.getClass().getGenericSuperclass(), 1);
   }
 
   /**
@@ -64,17 +62,13 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    * 获取数据权限筛选查询构建器
    *
    * @param wrapper 查询构建器
-   * @param entityClass 实体类
    * @param dataAuthorizer 数据权限管理者
    * @return 查询构建器
    */
   @NonNull
   default QueryWrapper buildDataAuthorityQueryWrapper(
-      @NonNull QueryWrapper wrapper,
-      @NonNull Class<T> entityClass,
-      @Nullable IDataAuthorizer dataAuthorizer) {
-    DataAuthority dataAuthority = DataAuthorityUtils.getDataAuthority(entityClass);
-    return FlexRestHelper.buildDataAuthorityQueryWrapper(wrapper, dataAuthority, dataAuthorizer);
+      @NonNull QueryWrapper wrapper, @Nullable IDataAuthorizer dataAuthorizer) {
+    return FlexRestHelper.buildDataAuthorityQueryWrapper(wrapper, dataAuthorizer);
   }
 
   /**
@@ -102,10 +96,9 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
       @Nullable FieldFilter[] fieldFilters,
       @Nullable FieldFilter[] searchFilters) {
     QueryWrapper wrapper = getListQueryWrapper();
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      wrapper = buildDataAuthorityQueryWrapper(wrapper, getEntityClass(), getDataAuthorizer());
-    }
+    // 限制数据权限
+    wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
+    // 构建筛选、搜索、排序
     List<T> data =
         list(
             FlexRestHelper.buildListQueryWrapper(
@@ -135,10 +128,9 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
       long page,
       long pageSize) {
     QueryWrapper wrapper = getListQueryWrapper();
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      wrapper = buildDataAuthorityQueryWrapper(wrapper, getEntityClass(), getDataAuthorizer());
-    }
+    // 限制数据权限
+    wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
+    // 构建筛选、搜索、排序
     Page<T> data =
         page(
             new Page<>(page, pageSize),
@@ -171,10 +163,9 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
   @NonNull
   default ListBody<T> getRootData() {
     QueryWrapper wrapper = getRootQueryWrapper();
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      wrapper = buildDataAuthorityQueryWrapper(wrapper, getEntityClass(), getDataAuthorizer());
-    }
+    // 限制数据权限
+    wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
+    // 限制根节点
     List<T> data = list(FlexRestHelper.buildRootQueryWrapper(wrapper));
     ListBody<T> listBody = new ListBody<>();
     listBody.setData(data);
@@ -204,10 +195,9 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
       return 0;
     }
     QueryWrapper wrapper = getDirectChildrenQueryWrapper();
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      wrapper = buildDataAuthorityQueryWrapper(wrapper, getEntityClass(), getDataAuthorizer());
-    }
+    // 限制数据权限
+    wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
+    // 限制子节点
     return count(FlexRestHelper.buildDirectChildrenQueryWrapper(wrapper, id));
   }
 
@@ -224,10 +214,9 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
       return new ListBody<>();
     }
     QueryWrapper wrapper = getDirectChildrenQueryWrapper();
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      wrapper = buildDataAuthorityQueryWrapper(wrapper, getEntityClass(), getDataAuthorizer());
-    }
+    // 限制数据权限
+    wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
+    // 限制子节点
     List<T> data = list(FlexRestHelper.buildDirectChildrenQueryWrapper(wrapper, id));
     ListBody<T> listBody = new ListBody<>();
     listBody.setData(data);
@@ -248,10 +237,9 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
       return new ListBody<>();
     }
     QueryWrapper wrapper = getDirectChildrenQueryWrapper();
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      wrapper = buildDataAuthorityQueryWrapper(wrapper, getEntityClass(), getDataAuthorizer());
-    }
+    // 限制数据权限
+    wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
+    // 限制子节点
     List<T> data = list(FlexRestHelper.buildDirectChildrenQueryWrapper(wrapper, ids));
     ListBody<T> listBody = new ListBody<>();
     listBody.setData(data);

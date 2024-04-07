@@ -3,18 +3,20 @@ package com.wangboot.model.dataauthority.authorizer;
 import cn.hutool.core.bean.DynaBean;
 import com.wangboot.core.auth.authorization.IAuthorizationResource;
 import com.wangboot.core.utils.StrUtils;
+import com.wangboot.model.dataauthority.datascope.SimpleDataScope;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.util.StringUtils;
 
 @AllArgsConstructor
-public class DataScopeAuthorizer implements IDataAuthorizer {
-  @Getter private final String field;
+public class UserIdDataAuthorizer implements IDataAuthorizer {
 
-  @NonNull @Getter private final Collection<? extends IAuthorizationResource> authorities;
+  @Getter private final String userId;
+  @Getter private final String field;
 
   @Override
   public boolean hasDataAuthority(@Nullable Object object) {
@@ -23,6 +25,11 @@ public class DataScopeAuthorizer implements IDataAuthorizer {
     }
     String val =
         DynaBean.create(object).get(StrUtils.toCamelCase(this.getField(), false)).toString();
-    return this.getAuthorities().stream().anyMatch(d -> d.getResourceName().equals(val));
+    return StringUtils.hasText(this.userId) && this.userId.equals(val);
+  }
+
+  @Override
+  public Collection<? extends IAuthorizationResource> getAuthorities() {
+    return Collections.singletonList(new SimpleDataScope(this.userId));
   }
 }

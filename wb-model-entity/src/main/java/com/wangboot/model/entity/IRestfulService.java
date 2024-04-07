@@ -1,18 +1,17 @@
 package com.wangboot.model.entity;
 
-import com.wangboot.core.auth.utils.AuthUtils;
-import com.wangboot.core.web.exception.DeleteCascadeFailedException;
 import com.wangboot.core.web.exception.DuplicatedException;
 import com.wangboot.core.web.response.ListBody;
-import com.wangboot.model.dataauthority.DataAuthority;
 import com.wangboot.model.dataauthority.authorizer.IDataAuthorizer;
 import com.wangboot.model.dataauthority.utils.DataAuthorityUtils;
-import com.wangboot.model.entity.request.DeletionPolicy;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.SortFilter;
 import com.wangboot.model.entity.utils.EntityUtils;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -42,10 +41,7 @@ public interface IRestfulService<T> {
    */
   @Nullable
   default IDataAuthorizer getDataAuthorizer() {
-    if (!getEntityClass().isAnnotationPresent(DataAuthority.class)) {
-      return null;
-    }
-    return DataAuthorityUtils.getDataAuthorizer(AuthUtils.getUserModel(), getEntityClass());
+    return DataAuthorityUtils.getDataAuthorizer(getEntityClass());
   }
 
   /**
@@ -69,9 +65,10 @@ public interface IRestfulService<T> {
       return null;
     }
     T data = getDataById(id);
-    if (Objects.nonNull(getDataAuthorizer())) {
+    IDataAuthorizer dataAuthorizer = getDataAuthorizer();
+    if (Objects.nonNull(dataAuthorizer)) {
       // 限制数据权限
-      if (getDataAuthorizer().authorize(data)) {
+      if (dataAuthorizer.hasDataAuthority(data)) {
         return data;
       } else {
         return null;
@@ -103,10 +100,10 @@ public interface IRestfulService<T> {
       return Collections.emptyList();
     }
     List<T> data = getDataByIds(ids);
-    if (Objects.nonNull(getDataAuthorizer())) {
+    IDataAuthorizer dataAuthorizer = getDataAuthorizer();
+    if (Objects.nonNull(dataAuthorizer)) {
       // 限制数据权限
-      IDataAuthorizer dataAuthorizer = getDataAuthorizer();
-      return data.stream().filter(dataAuthorizer::authorize).collect(Collectors.toList());
+      return data.stream().filter(dataAuthorizer::hasDataAuthority).collect(Collectors.toList());
     } else {
       // 不限制数据权限
       return data;
@@ -242,20 +239,35 @@ public interface IRestfulService<T> {
   boolean saveData(@NonNull T data);
 
   /**
+   * 创建对象前检查
+   *
+   * @param entity 实体对象
+   * @return 检查后的实体对象
+   */
+  @Nullable
+  default T checkBeforeCreateObject(@Nullable T entity) {
+    if (Objects.isNull(entity)) {
+      return null;
+    }
+    // 检查是否重复
+    if (isUniqueDuplicated(entity, true)) {
+      throw new DuplicatedException();
+    }
+    return entity;
+  }
+
+  /**
    * 逻辑层创建对象，检查数据权限
    *
    * @param entity 实体对象
    * @return boolean
    */
   default boolean createObject(@Nullable T entity) {
-    if (Objects.isNull(entity)) {
-      return false;
+    T t = checkBeforeCreateObject(entity);
+    if (Objects.nonNull(t)) {
+      return saveData(t);
     }
-    // 检查是否重复
-    if (isUniqueDuplicated(entity, true)) {
-      throw new DuplicatedException();
-    }
-    return saveData(entity);
+    return false;
   }
 
   /**
@@ -267,14 +279,15 @@ public interface IRestfulService<T> {
   boolean batchSaveData(@NonNull Collection<T> data);
 
   /**
-   * 逻辑层批量创建对象，检查数据权限
+   * 批量创建对象前检查
    *
-   * @param entities 实体对象集合
-   * @return boolean
+   * @param entities 数据集合
+   * @return 检查后的数据集合
    */
-  default boolean batchCreateObjects(@Nullable Collection<T> entities) {
+  @Nullable
+  default Collection<T> checkBeforeBatchCreateObjects(@Nullable Collection<T> entities) {
     if (Objects.isNull(entities)) {
-      return false;
+      return null;
     }
     // 检查是否重复
     entities.forEach(
@@ -283,7 +296,21 @@ public interface IRestfulService<T> {
             throw new DuplicatedException();
           }
         });
-    return batchSaveData(entities);
+    return entities;
+  }
+
+  /**
+   * 逻辑层批量创建对象，检查数据权限
+   *
+   * @param entities 实体对象集合
+   * @return boolean
+   */
+  default boolean batchCreateObjects(@Nullable Collection<T> entities) {
+    Collection<T> ts = checkBeforeBatchCreateObjects(entities);
+    if (Objects.nonNull(ts)) {
+      return batchSaveData(ts);
+    }
+    return false;
   }
 
   /**
@@ -295,36 +322,52 @@ public interface IRestfulService<T> {
   boolean updateData(@NonNull T data);
 
   /**
+   * 更新对象前检查
+   *
+   * @param entity 实体对象
+   * @return 检查后的实体对象
+   */
+  @Nullable
+  default T checkBeforeUpdateObject(@Nullable T entity) {
+    if (Objects.isNull(entity)) {
+      return null;
+    }
+    IDataAuthorizer dataAuthorizer = getDataAuthorizer();
+    if (Objects.nonNull(dataAuthorizer)) {
+      // 限制数据权限
+      // 根据 ID 获取原数据
+      T original = getDetailById(EntityUtils.getEntityIdentifier(entity));
+      if (Objects.isNull(original)) {
+        return null;
+      }
+      // 检查数据权限
+      if (!dataAuthorizer.hasDataAuthority(original)) {
+        return null;
+      }
+    }
+    if (isReadOnly(entity)) {
+      // 只读
+      return null;
+    }
+    // 检查是否重复
+    if (isUniqueDuplicated(entity, false)) {
+      throw new DuplicatedException();
+    }
+    return entity;
+  }
+
+  /**
    * 逻辑层更新对象，检查数据权限
    *
    * @param entity 实体对象
    * @return boolean
    */
   default boolean updateObject(@Nullable T entity) {
-    if (Objects.isNull(entity)) {
-      return false;
+    T t = checkBeforeUpdateObject(entity);
+    if (Objects.nonNull(t)) {
+      return updateData(t);
     }
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      // 根据 ID 获取原数据
-      T original = getDetailById(EntityUtils.getEntityIdentifier(entity));
-      if (Objects.isNull(original)) {
-        return false;
-      }
-      // 检查数据权限
-      if (!getDataAuthorizer().authorize(original)) {
-        return false;
-      }
-    }
-    if (isReadOnly(entity)) {
-      // 只读
-      return false;
-    }
-    // 检查是否重复
-    if (isUniqueDuplicated(entity, false)) {
-      throw new DuplicatedException();
-    }
-    return updateData(entity);
+    return false;
   }
 
   /**
@@ -336,42 +379,37 @@ public interface IRestfulService<T> {
   boolean deleteDataById(@NonNull Serializable id);
 
   /**
+   * 删除数据前检查
+   *
+   * @param id 实体ID
+   * @return 检查后的实体ID
+   */
+  @Nullable
+  default Serializable checkBeforeDeleteObjectById(@Nullable Serializable id) {
+    if (Objects.isNull(id)) {
+      return null;
+    }
+    // 获取数据，如果有检查数据权限
+    T entity = getDetailById(id);
+    if (Objects.isNull(entity) || isReadOnly(entity)) {
+      // 没有数据权限或只读
+      return null;
+    }
+    return id;
+  }
+
+  /**
    * 逻辑层删除对象，检查数据权限
    *
    * @param id ID
-   * @param policy 删除策略
    * @return boolean
    */
-  default boolean deleteObjectById(@Nullable Serializable id, @Nullable DeletionPolicy policy) {
-    if (Objects.isNull(id)) {
-      return false;
+  default boolean deleteObjectById(@Nullable Serializable id) {
+    Serializable s = checkBeforeDeleteObjectById(id);
+    if (Objects.nonNull(s)) {
+      return deleteDataById(s);
     }
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      T entity = getDetailById(id);
-      if (Objects.isNull(entity)) {
-        // 没有数据权限
-        return false;
-      }
-      if (isReadOnly(entity)) {
-        // 只读
-        return false;
-      }
-    } else {
-      // 不限制数据权限
-      // 获取数据，判断只读
-      T entity = getDetailById(id);
-      if (Objects.isNull(entity) || isReadOnly(entity)) {
-        return false;
-      }
-    }
-    if (DeletionPolicy.PROTECT.equals(policy) && EntityUtils.isTreeEntity(getEntityClass())) {
-      // 保护策略，存在子节点则失败
-      if (getDirectChildrenCount(id) > 0) {
-        throw new DeleteCascadeFailedException(id);
-      }
-    }
-    return deleteDataById(id);
+    return false;
   }
 
   /**
@@ -383,33 +421,42 @@ public interface IRestfulService<T> {
   boolean deleteData(@NonNull T data);
 
   /**
-   * 逻辑层删除对象，检查数据权限
+   * 删除数据前检查
    *
    * @param entity 实体对象
-   * @param policy 删除策略
-   * @return boolean
+   * @return 检查后的实体对象
    */
-  default boolean deleteObject(@Nullable T entity, @Nullable DeletionPolicy policy) {
+  @Nullable
+  default T checkBeforeDeleteObject(@Nullable T entity) {
     if (Objects.isNull(entity)) {
-      return false;
+      return null;
     }
-    if (Objects.nonNull(getDataAuthorizer())) {
+    IDataAuthorizer dataAuthorizer = getDataAuthorizer();
+    if (Objects.nonNull(dataAuthorizer)) {
       // 限制数据权限
-      if (!getDataAuthorizer().authorize(entity)) {
-        return false;
+      if (!dataAuthorizer.hasDataAuthority(entity)) {
+        return null;
       }
     }
     if (isReadOnly(entity)) {
       // 只读
-      return false;
+      return null;
     }
-    if (DeletionPolicy.PROTECT.equals(policy) && entity instanceof ITreeEntity) {
-      // 保护策略，存在子节点则失败
-      if (getDirectChildrenCount(EntityUtils.getEntityIdentifier(entity)) > 0) {
-        throw new DeleteCascadeFailedException(EntityUtils.getEntityIdentifier(entity));
-      }
+    return entity;
+  }
+
+  /**
+   * 逻辑层删除对象，检查数据权限
+   *
+   * @param entity 实体对象
+   * @return boolean
+   */
+  default boolean deleteObject(@Nullable T entity) {
+    T t = checkBeforeDeleteObject(entity);
+    if (Objects.nonNull(t)) {
+      return deleteData(t);
     }
-    return deleteData(entity);
+    return false;
   }
 
   /**
@@ -421,44 +468,40 @@ public interface IRestfulService<T> {
   boolean batchDeleteDataByIds(@NonNull Collection<? extends Serializable> ids);
 
   /**
+   * 批量删除数据前检查
+   *
+   * @param ids 数据 ID 集合
+   * @return 检查后的数据 ID 集合
+   */
+  @Nullable
+  default Collection<? extends Serializable> checkBeforeBatchDeleteObjectsByIds(
+      @Nullable Collection<? extends Serializable> ids) {
+    if (Objects.isNull(ids) || ids.isEmpty()) {
+      return null;
+    }
+    // 获取数据，如果缺少则有数据没有数据权限
+    List<T> entities = getDetailByIds(ids);
+    if (entities.size() != ids.size()) {
+      return null;
+    }
+    // 判断只读
+    if (isAnyReadOnly(entities)) {
+      return null;
+    }
+    return ids;
+  }
+
+  /**
    * 逻辑层删除对象，检查数据权限
    *
    * @param ids ID 集合
-   * @param policy 删除策略
    * @return boolean
    */
-  default boolean batchDeleteObjectsByIds(
-      @Nullable Collection<? extends Serializable> ids, @Nullable DeletionPolicy policy) {
-    if (Objects.isNull(ids) || ids.isEmpty()) {
-      return false;
+  default boolean batchDeleteObjectsByIds(@Nullable Collection<? extends Serializable> ids) {
+    Collection<? extends Serializable> ss = checkBeforeBatchDeleteObjectsByIds(ids);
+    if (Objects.nonNull(ss)) {
+      return batchDeleteDataByIds(ss);
     }
-    if (Objects.nonNull(getDataAuthorizer())) {
-      // 限制数据权限
-      // 获取数据，如果缺少则有数据没有数据权限
-      List<T> entities = getDetailByIds(ids);
-      if (entities.size() != ids.size()) {
-        return false;
-      }
-      // 判断只读
-      if (isAnyReadOnly(entities)) {
-        return false;
-      }
-    } else {
-      // 不限制数据权限
-      // 获取数据，判断只读
-      List<T> entities = getDetailByIds(ids);
-      if (isAnyReadOnly(entities)) {
-        return false;
-      }
-    }
-    if (DeletionPolicy.PROTECT.equals(policy) && EntityUtils.isTreeEntity(getEntityClass())) {
-      // 保护策略，存在子节点则失败
-      ListBody<T> children = getDirectChildren(ids);
-      if (children.getTotal() > 0) {
-        throw new DeleteCascadeFailedException(
-            ids.stream().map(Objects::toString).collect(Collectors.joining(IDS_SEP)));
-      }
-    }
-    return batchDeleteDataByIds(ids);
+    return false;
   }
 }
