@@ -73,6 +73,14 @@ public class CacheTest {
     CacheUtil.put(k1, s1, 10);
     Thread.sleep(20);
     Assertions.assertNull(CacheUtil.get(k1, String.class));
+    Object v7 = CacheUtil.getOrSet(k1, 50, () -> s1);
+    Assertions.assertNotNull(v7);
+    Assertions.assertEquals(s1, v7.toString());
+    Object v8 = CacheUtil.getOrSet(k1, 50, () -> s2);
+    Assertions.assertNotNull(v8);
+    Assertions.assertEquals(s1, v8.toString());
+    String v9 = CacheUtil.getOrSet(k1, String.class, 50, () -> s2);
+    Assertions.assertEquals(s1, v9);
     CacheUtil.clear(cacheName);
   }
 }

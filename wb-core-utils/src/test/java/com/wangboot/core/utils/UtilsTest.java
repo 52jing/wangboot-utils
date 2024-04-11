@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.List;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -138,6 +139,62 @@ public class UtilsTest {
     List<String> ls2 = StrUtils.splitStrByLineWidth(s2, 7);
     Assertions.assertEquals(5, ls2.size());
     Assertions.assertEquals(s2.substring(0, 7), ls2.get(0));
+    // joinStrList
+    String del = ",";
+    Assertions.assertEquals("", StrUtils.joinStrList(null, del));
+    List<String> ls = Lists.list("a", "b", "c");
+    String s = StrUtils.joinStrList(ls, del);
+    Assertions.assertEquals("a,b,c", s);
+    // splitStrList
+    Assertions.assertEquals(ls, StrUtils.splitStrList(s, del));
+    Assertions.assertEquals(0, StrUtils.splitStrList("", del).size());
+    // splitLongList
+    s = "1,2,3";
+    List<Long> ll = StrUtils.splitLongList(s, del);
+    Assertions.assertEquals(3, ll.size());
+    Assertions.assertEquals(s, StrUtils.joinList(ll, del));
+    Assertions.assertEquals(0, StrUtils.splitLongList("", del).size());
+    // splitIntList
+    List<Integer> li = StrUtils.splitIntList(s, del);
+    Assertions.assertEquals(3, li.size());
+    Assertions.assertEquals(s, StrUtils.joinList(li, del));
+    Assertions.assertEquals(0, StrUtils.splitIntList("", del).size());
+    // splitFloatList
+    s = "1.2,6.5";
+    List<Float> lf = StrUtils.splitFloatList(s, del);
+    Assertions.assertEquals(2, lf.size());
+    Assertions.assertEquals(s, StrUtils.joinList(lf, del));
+    Assertions.assertEquals(0, StrUtils.splitFloatList("", del).size());
+    // splitBooleanList
+    s = "true,false";
+    List<Boolean> lb = StrUtils.splitBooleanList(s, del);
+    Assertions.assertEquals(2, lb.size());
+    Assertions.assertEquals(s, StrUtils.joinList(lb, del));
+    Assertions.assertEquals(0, StrUtils.splitBooleanList("", del).size());
+    // getInteger
+    Assertions.assertEquals(1, StrUtils.getInteger("1"));
+    Assertions.assertEquals(2, StrUtils.getInteger(null, 2));
+    // getIntPrimitive
+    Assertions.assertEquals(1, StrUtils.getIntPrimitive("1", 2));
+    Assertions.assertEquals(2, StrUtils.getIntPrimitive("", 2));
+    // getLong
+    Assertions.assertEquals(1L, StrUtils.getLong("1"));
+    Assertions.assertEquals(2L, StrUtils.getLong(null, 2L));
+    // getLongPrimitive
+    Assertions.assertEquals(1L, StrUtils.getLongPrimitive("1", 2L));
+    Assertions.assertEquals(2L, StrUtils.getLongPrimitive("", 2L));
+    // getFloat
+    Assertions.assertEquals(1.2f, StrUtils.getFloat("1.2"));
+    Assertions.assertEquals(0.5f, StrUtils.getFloat(null, 0.5f));
+    // getFloatPrimitive
+    Assertions.assertEquals(1.5f, StrUtils.getFloatPrimitive("1.5", 0.8f));
+    Assertions.assertEquals(0.8f, StrUtils.getFloatPrimitive("", 0.8f));
+    // getBoolean
+    Assertions.assertEquals(true, StrUtils.getBoolean("true"));
+    Assertions.assertEquals(false, StrUtils.getBoolean(null, false));
+    // getBooleanPrimitive
+    Assertions.assertTrue(StrUtils.getBooleanPrimitive("true", false));
+    Assertions.assertFalse(StrUtils.getBooleanPrimitive("", false));
     // getDuration
     Duration d1 = StrUtils.getDuration("10s");
     Assertions.assertEquals(10, d1.getSeconds());

@@ -1,11 +1,8 @@
 package com.wangboot.core.web.param.impl;
 
-import cn.hutool.extra.spring.SpringUtil;
 import com.wangboot.core.web.param.IParamConfig;
-import java.util.Objects;
 import org.springframework.core.env.Environment;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
@@ -21,21 +18,9 @@ public class EnvFileParamConfig implements IParamConfig {
 
   private final String prefix;
 
-  public EnvFileParamConfig(@Nullable Environment environment, String prefix) {
-    if (Objects.nonNull(environment)) {
-      this.environment = environment;
-    } else {
-      this.environment = SpringUtil.getBean(Environment.class);
-    }
+  public EnvFileParamConfig(@NonNull Environment environment, String prefix) {
+    this.environment = environment;
     this.prefix = StringUtils.hasText(prefix) ? prefix : "";
-  }
-
-  public EnvFileParamConfig(String prefix) {
-    this(null, prefix);
-  }
-
-  public EnvFileParamConfig() {
-    this(null, "");
   }
 
   @Override

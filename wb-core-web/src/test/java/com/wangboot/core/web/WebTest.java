@@ -49,18 +49,23 @@ public class WebTest {
     List<String> out1 = paramConfig.getStrList("a,b,c");
     Assertions.assertEquals(3, out1.size());
     Assertions.assertEquals("a", out1.get(0));
+    Assertions.assertEquals(0, paramConfig.getParamConfigAsStrList(null).size());
     List<Integer> out2 = paramConfig.getIntList("1,2");
     Assertions.assertEquals(2, out2.size());
     Assertions.assertEquals(1, out2.get(0));
+    Assertions.assertEquals(0, paramConfig.getParamConfigAsIntList(null).size());
     List<Long> out3 = paramConfig.getLongList("1,2,3");
     Assertions.assertEquals(3, out3.size());
     Assertions.assertEquals(1, out3.get(0));
+    Assertions.assertEquals(0, paramConfig.getParamConfigAsLongList(null).size());
     List<Float> out4 = paramConfig.getFloatList("1.2,2.5");
     Assertions.assertEquals(2, out4.size());
     Assertions.assertEquals(1.2f, out4.get(0));
+    Assertions.assertEquals(0, paramConfig.getParamConfigAsFloatList(null).size());
     List<Boolean> out5 = paramConfig.getBooleanList("true,false");
     Assertions.assertEquals(2, out5.size());
     Assertions.assertEquals(true, out5.get(0));
+    Assertions.assertEquals(0, paramConfig.getParamConfigAsBooleanList(null).size());
   }
 
   @Test

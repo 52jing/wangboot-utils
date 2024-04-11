@@ -4,6 +4,7 @@ import com.wangboot.core.web.exception.InMaintenanceException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
+import lombok.Generated;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -14,6 +15,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * @author wwtg99
  */
 @AllArgsConstructor
+@Generated
 public class InMaintenanceInterceptor implements HandlerInterceptor {
 
   @Getter @Setter private boolean inMaintenance;

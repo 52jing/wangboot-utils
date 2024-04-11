@@ -1,12 +1,13 @@
 package com.wangboot.core.web.event;
 
+import lombok.Generated;
 import org.springframework.context.ApplicationEvent;
 
 /**
  * 配置更新事件
  *
  * @author wwtg99
- */
+ */@Generated
 public class ParamUpdatedEvent extends ApplicationEvent {
 
   public ParamUpdatedEvent(ParamUpdatedRecord paramUpdatedRecord) {

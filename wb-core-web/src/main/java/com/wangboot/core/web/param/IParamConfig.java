@@ -21,6 +21,31 @@ public interface IParamConfig {
   String getParamConfig(@Nullable String key);
 
   @NonNull
+  default List<String> getParamConfigAsStrList(@Nullable String key) {
+    return getStrList(getParamConfig(key));
+  }
+
+  @NonNull
+  default List<Integer> getParamConfigAsIntList(@Nullable String key) {
+    return getIntList(getParamConfig(key));
+  }
+
+  @NonNull
+  default List<Long> getParamConfigAsLongList(@Nullable String key) {
+    return getLongList(getParamConfig(key));
+  }
+
+  @NonNull
+  default List<Float> getParamConfigAsFloatList(@Nullable String key) {
+    return getFloatList(getParamConfig(key));
+  }
+
+  @NonNull
+  default List<Boolean> getParamConfigAsBooleanList(@Nullable String key) {
+    return getBooleanList(getParamConfig(key));
+  }
+
+  @NonNull
   default List<String> getStrList(@Nullable String val) {
     if (StringUtils.hasText(val)) {
       return StrUtils.splitStrList(val, PARAM_LIST_DELIMITER);

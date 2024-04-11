@@ -161,11 +161,22 @@ public class CacheUtil {
     return get(defaultCacheName, key, type, null);
   }
 
+  /**
+   * 获取缓存，不存在则设置
+   *
+   * @param name 缓存名称
+   * @param key 缓存键
+   * @param type 值类型
+   * @param ttl 存活时间（毫秒）, 0 则不限时
+   * @param setIfAbsent 不存在获取数据函数
+   * @param <T> 值类型
+   * @return 缓存值
+   */
   @Nullable
   public static <T> T getOrSet(
-      String name, String key, Class<T> type, long ttl, Supplier<T> setIfAbsent) {
+      String name, String key, Class<T> type, long ttl, @Nullable Supplier<T> setIfAbsent) {
     T data = get(name, key, type, null);
-    if (Objects.isNull(data)) {
+    if (Objects.isNull(data) && Objects.nonNull(setIfAbsent)) {
       // 不存在则使用函数获取并赋值
       data = setIfAbsent.get();
       if (Objects.nonNull(data)) {
@@ -175,30 +186,33 @@ public class CacheUtil {
     return data;
   }
 
+  /**
+   * 获取缓存，不存在则设置
+   *
+   * @param key 缓存键
+   * @param type 值类型
+   * @param ttl 存活时间（毫秒）, 0 则不限时
+   * @param setIfAbsent 不存在获取数据函数
+   * @param <T> 值类型
+   * @return 缓存值
+   */
   @Nullable
-  public static <T> T getOrSet(String key, Class<T> type, long ttl, Supplier<T> setIfAbsent) {
-    T data = get(key, type, null);
-    if (Objects.isNull(data) && Objects.nonNull(setIfAbsent)) {
-      // 不存在则使用函数获取并赋值
-      data = setIfAbsent.get();
-      if (Objects.nonNull(data)) {
-        put(key, data, ttl);
-      }
-    }
-    return data;
+  public static <T> T getOrSet(
+      String key, Class<T> type, long ttl, @Nullable Supplier<T> setIfAbsent) {
+    return getOrSet(defaultCacheName, key, type, ttl, setIfAbsent);
   }
 
+  /**
+   * 获取缓存，不存在则设置
+   *
+   * @param key 缓存键
+   * @param ttl 存活时间（毫秒）, 0 则不限时
+   * @param setIfAbsent 不存在获取数据函数
+   * @return 缓存值
+   */
   @Nullable
-  public static Object getOrSet(String key, long ttl, Supplier<Object> setIfAbsent) {
-    Object data = get(key);
-    if (Objects.isNull(data) && Objects.nonNull(setIfAbsent)) {
-      // 不存在则使用函数获取并赋值
-      data = setIfAbsent.get();
-      if (Objects.nonNull(data)) {
-        put(key, data, ttl);
-      }
-    }
-    return data;
+  public static Object getOrSet(String key, long ttl, @Nullable Supplier<Object> setIfAbsent) {
+    return getOrSet(defaultCacheName, key, Object.class, ttl, setIfAbsent);
   }
 
   /**

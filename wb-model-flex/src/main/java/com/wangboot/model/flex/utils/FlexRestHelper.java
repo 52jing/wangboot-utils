@@ -4,11 +4,12 @@ import cn.hutool.core.bean.DynaBean;
 import cn.hutool.core.convert.Convert;
 import cn.hutool.core.text.CharSequenceUtil;
 import com.mybatisflex.core.query.QueryWrapper;
-import com.mybatisflex.core.service.IService;
 import com.wangboot.core.auth.authorization.IAuthorizationResource;
 import com.wangboot.core.utils.StrUtils;
 import com.wangboot.model.dataauthority.authorizer.IDataAuthorizer;
-import com.wangboot.model.entity.*;
+import com.wangboot.model.entity.FieldConstants;
+import com.wangboot.model.entity.IUniqueEntity;
+import com.wangboot.model.entity.RequestConstants;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.SortFilter;
 import java.io.Serializable;
@@ -308,5 +309,4 @@ public class FlexRestHelper {
     }
     return wrapper;
   }
-
 }

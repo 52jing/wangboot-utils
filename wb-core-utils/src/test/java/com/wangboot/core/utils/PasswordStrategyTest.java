@@ -79,5 +79,7 @@ public class PasswordStrategyTest {
     Assertions.assertFalse(manager.checkStrategies("qwe123-_*&"));
     Assertions.assertFalse(manager.checkStrategies("RTY123-_*&"));
     Assertions.assertFalse(manager.checkStrategies("qR1-"));
+    manager.clearStrategies();
+    Assertions.assertTrue(manager.checkStrategies("123"));
   }
 }

@@ -151,17 +151,25 @@ public class CaptchaTest {
   }
 
   @Test
-  public void testCaptchaUtils() {
+  public void testCaptchaProcessorHolder() {
     ImageCaptchaConfig config = new ImageCaptchaConfig();
     ICaptchaRepository repository = new MapCaptchaRepository();
     ImageCaptchaProcessor p = new ImageCaptchaProcessor(config, repository, null);
     String type = "image";
     CaptchaProcessorHolder.addProcessor(type, p);
     Assertions.assertNotNull(CaptchaProcessorHolder.getProcessor(type));
+    Assertions.assertNull(CaptchaProcessorHolder.getProcessor(""));
     Assertions.assertNull(CaptchaProcessorHolder.getProcessor(RandomUtil.randomString(3)));
     String uid = RandomUtil.randomString(6);
     ICaptchaData captchaData = CaptchaProcessorHolder.generateCaptcha(type, uid);
     Assertions.assertNotNull(captchaData);
+    Assertions.assertNull(CaptchaProcessorHolder.generateCaptcha("", uid));
+    Map<String, String> map = CaptchaProcessorHolder.send(type, captchaData);
+    Assertions.assertTrue(map.containsKey(ImageCaptchaProcessor.BASE64_DATA_KEY));
+    Assertions.assertTrue(CaptchaProcessorHolder.send("", captchaData).isEmpty());
     Assertions.assertTrue(CaptchaProcessorHolder.verifyCaptcha(type, captchaData.getCode(), uid));
+    Assertions.assertFalse(CaptchaProcessorHolder.verifyCaptcha("", captchaData.getCode(), uid));
+    map = CaptchaProcessorHolder.generateAndSend(type, uid);
+    Assertions.assertTrue(map.containsKey(ImageCaptchaProcessor.BASE64_DATA_KEY));
   }
 }

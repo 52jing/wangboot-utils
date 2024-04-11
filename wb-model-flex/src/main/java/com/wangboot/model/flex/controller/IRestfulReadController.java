@@ -154,7 +154,7 @@ public interface IRestfulReadController<T> extends IRestfulController {
    */
   @Nullable
   default Long getMaxPageSize() {
-    return null;
+    return 500L;
   }
 
   /**
