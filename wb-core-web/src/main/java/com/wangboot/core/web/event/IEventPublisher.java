@@ -5,6 +5,7 @@ import lombok.Generated;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.lang.Nullable;
 
 /**
  * 应用事件发布者
@@ -26,8 +27,8 @@ public interface IEventPublisher extends ApplicationEventPublisherAware {
    *
    * @param event 事件
    */
-  default void publishEvent(ApplicationEvent event) {
-    if (this.supportEvent()) {
+  default void publishEvent(@Nullable ApplicationEvent event) {
+    if (this.supportEvent() && Objects.nonNull(event)) {
       this.getApplicationEventPublisher().publishEvent(event);
     }
   }

@@ -45,15 +45,14 @@ public interface IRestfulWriteController<T> extends IRestfulController {
       throw new CreateFailedException();
     }
     // 发布创建前操作事件
-    this.publishOperationEvent(
-        OperationEventType.BEFORE_CREATE_EVENT, obj.getClass().getSimpleName(), obj);
+    this.publishOperationEvent(getWriteEntityClass(), OperationEventType.BEFORE_CREATE_EVENT, obj);
     // 执行创建
     boolean ret = getWriteService().createObject(obj);
     if (ret) {
       // 发布创建操作事件
       this.publishOperationEvent(
+          getWriteEntityClass(),
           OperationEventType.CREATED_EVENT,
-          obj.getClass().getSimpleName(),
           EntityUtils.getEntityIdentifierStr(obj),
           obj);
       return obj;
@@ -87,13 +86,13 @@ public interface IRestfulWriteController<T> extends IRestfulController {
     Serializable id = EntityUtils.getEntityIdentifier(obj);
     // 发布更新前操作事件
     this.publishOperationEvent(
-        OperationEventType.BEFORE_UPDATE_EVENT, obj.getClass().getSimpleName(), id.toString(), obj);
+        getWriteEntityClass(), OperationEventType.BEFORE_UPDATE_EVENT, id.toString(), obj);
     // 执行更新
     boolean ret = getWriteService().updateObject(obj);
     if (ret) {
       // 发布更新操作事件
       this.publishOperationEvent(
-          OperationEventType.UPDATED_EVENT, obj.getClass().getSimpleName(), id.toString(), obj);
+          getWriteEntityClass(), OperationEventType.UPDATED_EVENT, id.toString(), obj);
       return obj;
     } else {
       throw new UpdateFailedException(id);
@@ -122,19 +121,13 @@ public interface IRestfulWriteController<T> extends IRestfulController {
     }
     // 发布删除前操作事件
     this.publishOperationEvent(
-        OperationEventType.BEFORE_DELETE_EVENT,
-        getWriteEntityClass().getSimpleName(),
-        id.toString(),
-        null);
+        getWriteEntityClass(), OperationEventType.BEFORE_DELETE_EVENT, id.toString(), null);
     // 执行删除
     boolean ret = getWriteService().deleteObjectById(id);
     if (ret) {
       // 发布删除操作事件
       this.publishOperationEvent(
-          OperationEventType.DELETED_EVENT,
-          getWriteEntityClass().getSimpleName(),
-          id.toString(),
-          null);
+          getWriteEntityClass(), OperationEventType.DELETED_EVENT, id.toString(), null);
     } else {
       throw new DeleteFailedException(id);
     }
@@ -164,10 +157,7 @@ public interface IRestfulWriteController<T> extends IRestfulController {
     ids.forEach(
         i ->
             this.publishOperationEvent(
-                OperationEventType.BEFORE_DELETE_EVENT,
-                getWriteEntityClass().getSimpleName(),
-                i.toString(),
-                null));
+                getWriteEntityClass(), OperationEventType.BEFORE_DELETE_EVENT, i.toString(), null));
     // 执行删除
     boolean ret = getWriteService().batchDeleteObjectsByIds(ids);
     if (ret) {
@@ -175,10 +165,7 @@ public interface IRestfulWriteController<T> extends IRestfulController {
       ids.forEach(
           i ->
               this.publishOperationEvent(
-                  OperationEventType.DELETED_EVENT,
-                  getWriteEntityClass().getSimpleName(),
-                  i.toString(),
-                  null));
+                  getWriteEntityClass(), OperationEventType.DELETED_EVENT, i.toString(), null));
 
     } else {
       throw new DeleteFailedException(

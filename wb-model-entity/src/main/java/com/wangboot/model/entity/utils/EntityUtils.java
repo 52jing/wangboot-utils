@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanException;
 import cn.hutool.core.bean.DynaBean;
 import com.wangboot.core.utils.ObjectUtils;
 import com.wangboot.model.entity.*;
+import com.wangboot.model.entity.event.EnableOperationLog;
 import java.io.Serializable;
 import java.util.Objects;
 import org.springframework.lang.NonNull;
@@ -172,6 +173,22 @@ public class EntityUtils {
     }
     if (obj instanceof IdEntity) {
       ((IdEntity<Serializable>) obj).setId(id);
+    }
+  }
+
+  /** 是否启用操作日志记录 */
+  public static boolean isOperationLogEnabled(@NonNull Class<?> entityClass) {
+    return entityClass.isAnnotationPresent(EnableOperationLog.class);
+  }
+
+  /** 获取操作日志注解 */
+  @NonNull
+  public static EnableOperationLog getOperationLogAnnotation(@NonNull Class<?> entityClass) {
+    EnableOperationLog annotation = entityClass.getAnnotation(EnableOperationLog.class);
+    if (Objects.nonNull(annotation)) {
+      return annotation;
+    } else {
+      throw new IllegalArgumentException("No EnableOperationLog annotation found for entity!");
     }
   }
 }

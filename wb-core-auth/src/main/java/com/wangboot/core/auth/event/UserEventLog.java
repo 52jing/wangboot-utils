@@ -20,8 +20,6 @@ import org.springframework.lang.Nullable;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserEventLog {
-  /** 请求体 */
-  @Nullable private Object body;
   /** 事件名称 */
   private String event;
   /** 事件状态 */
