@@ -1,4 +1,4 @@
-package com.wangboot.model.flex;
+package com.wangboot.model.entity.request;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -13,8 +13,8 @@ import lombok.experimental.Accessors;
  */
 @Data
 @Accessors(chain = true)
-public class IdListBody<T extends Serializable> implements Serializable {
+public class IdListBody<I extends Serializable> implements Serializable {
 
   @NotNull(message = "message.ids_not_empty")
-  private Collection<T> ids;
+  private Collection<I> ids;
 }

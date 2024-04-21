@@ -1,10 +1,11 @@
-package com.wangboot.model.flex.controller;
+package com.wangboot.model.entity.controller;
 
 import com.wangboot.core.auth.annotation.RestPermissionAction;
 import com.wangboot.core.auth.authorization.resource.ApiResource;
 import com.wangboot.model.entity.IRestfulService;
+import com.wangboot.model.entity.IdEntity;
+import com.wangboot.model.entity.request.IdListBody;
 import com.wangboot.model.entity.utils.EntityUtils;
-import com.wangboot.model.flex.IdListBody;
 import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,14 +19,19 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 集成读写分离 Restful 接口的控制器抽象基类
  *
- * @param <R> 读实体
- * @param <RS> 读服务
- * @param <W> 写实体
- * @param <WS> 写服务
+ * @param <I> 主键类型
+ * @param <R> 读实体类型
+ * @param <RS> 读服务类型
+ * @param <W> 写实体类型
+ * @param <WS> 写服务类型
  */
 public abstract class RestfulApiReadWriteController<
-        R, RS extends IRestfulService<R>, W, WS extends IRestfulService<W>>
-    implements IRestfulReadWriteController<R, W> {
+        I extends Serializable,
+        R extends IdEntity<I>,
+        RS extends IRestfulService<I, R>,
+        W extends IdEntity<I>,
+        WS extends IRestfulService<I, W>>
+    implements IRestfulReadWriteController<I, R, W> {
 
   @Getter @Setter private ApplicationEventPublisher applicationEventPublisher;
 
@@ -35,13 +41,13 @@ public abstract class RestfulApiReadWriteController<
 
   @NonNull
   @Override
-  public IRestfulService<R> getReadService() {
+  public IRestfulService<I, R> getReadService() {
     return this.readEntityService;
   }
 
   @NonNull
   @Override
-  public IRestfulService<W> getWriteService() {
+  public IRestfulService<I, W> getWriteService() {
     return this.writeEntityService;
   }
 
@@ -55,37 +61,36 @@ public abstract class RestfulApiReadWriteController<
   @GetMapping("/{id}")
   @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_VIEW)
   @NonNull
-  public ResponseEntity<?> detailApi(@PathVariable Serializable id) {
-    return this.detailResponse(id);
+  public ResponseEntity<?> detailApi(@PathVariable I id) {
+    return this.viewResponse(id);
   }
 
   @PostMapping
   @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_CREATE)
   @NonNull
   public ResponseEntity<?> createApi(@Validated @RequestBody W obj) {
-    return this.createDataResponse(obj);
+    return this.createResponse(obj);
   }
 
   @PutMapping("/{id}")
   @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_UPDATE)
   @NonNull
-  public ResponseEntity<?> updateApi(@PathVariable Serializable id, @Validated @RequestBody W obj) {
+  public ResponseEntity<?> updateApi(@PathVariable I id, @Validated @RequestBody W obj) {
     EntityUtils.setEntityIdentifier(obj, id);
-    return this.updateDataResponse(obj);
+    return this.updateResponse(obj);
   }
 
   @DeleteMapping("/{id}")
   @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_DELETE)
   @NonNull
-  public ResponseEntity<?> removeApi(@PathVariable Serializable id) {
-    return this.deleteDataByIdResponse(id);
+  public ResponseEntity<?> removeApi(@PathVariable I id) {
+    return this.deleteByIdResponse(id);
   }
 
   @DeleteMapping
   @RestPermissionAction(ApiResource.REST_PERMISSION_ACTION_DELETE)
   @NonNull
-  public ResponseEntity<?> batchRemoveApi(
-      @Validated @RequestBody IdListBody<? extends Serializable> ids) {
-    return this.batchDeleteDataByIdResponse(ids.getIds());
+  public ResponseEntity<?> batchRemoveApi(@Validated @RequestBody IdListBody<I> ids) {
+    return this.batchDeleteByIdResponse(ids.getIds());
   }
 }

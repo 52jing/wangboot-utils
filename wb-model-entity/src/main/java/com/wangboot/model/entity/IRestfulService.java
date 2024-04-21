@@ -1,9 +1,13 @@
 package com.wangboot.model.entity;
 
+import com.wangboot.core.auth.utils.AuthUtils;
 import com.wangboot.core.web.exception.DuplicatedException;
 import com.wangboot.core.web.response.ListBody;
+import com.wangboot.core.web.utils.ServletUtils;
 import com.wangboot.model.dataauthority.authorizer.IDataAuthorizer;
 import com.wangboot.model.dataauthority.utils.DataAuthorityUtils;
+import com.wangboot.model.entity.event.IOperationEventPublisher;
+import com.wangboot.model.entity.event.OperationEventType;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.SortFilter;
 import com.wangboot.model.entity.utils.EntityUtils;
@@ -13,19 +17,43 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
  * Restful 服务接口
  *
+ * @param <I> 主键类型
  * @param <T> 实体类型
  * @author wwtg99
  */
-public interface IRestfulService<T> {
+public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
+    extends IOperationEventPublisher {
 
   /** ID 分隔符 */
-  String IDS_SEP = ",";
+  //  String IDS_SEP = ",";
+
+  /**
+   * 获取当前用户ID
+   *
+   * @return 用户ID
+   */
+  @Override
+  default String getUserId() {
+    return AuthUtils.getUserId();
+  }
+
+  /**
+   * 获取请求
+   *
+   * @return 请求
+   */
+  @Override
+  @Nullable
+  default HttpServletRequest getRequest() {
+    return ServletUtils.getRequest();
+  }
 
   /**
    * 获取实体类型
@@ -51,7 +79,7 @@ public interface IRestfulService<T> {
    * @return 实体对象
    */
   @Nullable
-  T getDataById(@NonNull Serializable id);
+  T getDataById(@NonNull I id);
 
   /**
    * 逻辑层根据 ID 获取对象详情，检查数据权限，不存在或无权限则返回 null
@@ -60,7 +88,7 @@ public interface IRestfulService<T> {
    * @return 实体对象
    */
   @Nullable
-  default T getDetailById(@Nullable Serializable id) {
+  default T viewResource(@Nullable I id) {
     if (Objects.isNull(id)) {
       return null;
     }
@@ -86,7 +114,7 @@ public interface IRestfulService<T> {
    * @return 实体对象集合
    */
   @NonNull
-  List<T> getDataByIds(@NonNull Collection<? extends Serializable> ids);
+  List<T> getDataByIds(@NonNull Collection<I> ids);
 
   /**
    * 逻辑层根据 ID 集合获取对象详情集合，检查数据权限，不存在或无权限则返回空集合
@@ -95,7 +123,7 @@ public interface IRestfulService<T> {
    * @return 实体对象集合
    */
   @NonNull
-  default List<T> getDetailByIds(@Nullable Collection<? extends Serializable> ids) {
+  default List<T> viewResources(@Nullable Collection<I> ids) {
     if (Objects.isNull(ids)) {
       return Collections.emptyList();
     }
@@ -119,7 +147,7 @@ public interface IRestfulService<T> {
    * @return 数据列表
    */
   @NonNull
-  ListBody<T> getListAll(
+  ListBody<T> listResourcesAll(
       @Nullable SortFilter[] sortFilters,
       @Nullable FieldFilter[] fieldFilters,
       @Nullable FieldFilter[] searchFilters);
@@ -135,7 +163,7 @@ public interface IRestfulService<T> {
    * @return 数据列表
    */
   @NonNull
-  ListBody<T> getListPage(
+  ListBody<T> listResourcesPage(
       @Nullable SortFilter[] sortFilter,
       @Nullable FieldFilter[] fieldFilter,
       @Nullable FieldFilter[] searchFilters,
@@ -148,7 +176,7 @@ public interface IRestfulService<T> {
    * @return 数据列表
    */
   @NonNull
-  ListBody<T> getRootData();
+  List<T> listRootResources();
 
   /**
    * 逻辑层获取直接子数据数量
@@ -156,7 +184,7 @@ public interface IRestfulService<T> {
    * @param id ID
    * @return 数据数量
    */
-  long getDirectChildrenCount(@Nullable Serializable id);
+  long getDirectChildrenCount(@Nullable I id);
 
   /**
    * 逻辑层获取直接子数据列表
@@ -165,7 +193,7 @@ public interface IRestfulService<T> {
    * @return 数据列表
    */
   @NonNull
-  ListBody<T> getDirectChildren(@Nullable Serializable id);
+  List<T> listDirectChildren(@Nullable I id);
 
   /**
    * 逻辑层获取直接子数据列表
@@ -174,7 +202,7 @@ public interface IRestfulService<T> {
    * @return 数据列表
    */
   @NonNull
-  ListBody<T> getDirectChildren(@Nullable Collection<? extends Serializable> ids);
+  List<T> listDirectChildren(@Nullable Collection<I> ids);
 
   /**
    * 是否存在重复字段行
@@ -262,12 +290,24 @@ public interface IRestfulService<T> {
    * @param entity 实体对象
    * @return boolean
    */
-  default boolean createObject(@Nullable T entity) {
+  default boolean createResource(@Nullable T entity) {
+    // 创建前检查
     T t = checkBeforeCreateObject(entity);
-    if (Objects.nonNull(t)) {
-      return saveData(t);
+    if (Objects.isNull(t)) {
+      return false;
     }
-    return false;
+    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布创建前操作事件
+      this.publishOperationEvent(getEntityClass(), OperationEventType.BEFORE_CREATE_EVENT, t);
+    }
+    // 执行创建
+    boolean ret = saveData(t);
+    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布创建操作事件
+      this.publishOperationEvent(
+          getEntityClass(), OperationEventType.CREATED_EVENT, t.getId().toString(), t);
+    }
+    return ret;
   }
 
   /**
@@ -305,12 +345,29 @@ public interface IRestfulService<T> {
    * @param entities 实体对象集合
    * @return boolean
    */
-  default boolean batchCreateObjects(@Nullable Collection<T> entities) {
+  default boolean batchCreateResources(@Nullable Collection<T> entities) {
+    // 创建前检查
     Collection<T> ts = checkBeforeBatchCreateObjects(entities);
-    if (Objects.nonNull(ts)) {
-      return batchSaveData(ts);
+    if (Objects.isNull(ts)) {
+      return false;
     }
-    return false;
+    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布创建前操作事件
+      ts.forEach(
+          t ->
+              this.publishOperationEvent(
+                  getEntityClass(), OperationEventType.BEFORE_CREATE_EVENT, t));
+    }
+    // 执行创建
+    boolean ret = batchSaveData(ts);
+    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布创建操作事件
+      ts.forEach(
+          t ->
+              this.publishOperationEvent(
+                  getEntityClass(), OperationEventType.CREATED_EVENT, t.getId().toString(), t));
+    }
+    return ret;
   }
 
   /**
@@ -336,7 +393,7 @@ public interface IRestfulService<T> {
     if (Objects.nonNull(dataAuthorizer)) {
       // 限制数据权限
       // 根据 ID 获取原数据
-      T original = getDetailById(EntityUtils.getEntityIdentifier(entity));
+      T original = viewResource(entity.getId());
       if (Objects.isNull(original)) {
         return null;
       }
@@ -362,55 +419,68 @@ public interface IRestfulService<T> {
    * @param entity 实体对象
    * @return boolean
    */
-  default boolean updateObject(@Nullable T entity) {
+  default boolean updateResource(@Nullable T entity) {
+    // 更新前检查
     T t = checkBeforeUpdateObject(entity);
-    if (Objects.nonNull(t)) {
-      return updateData(t);
+    if (Objects.isNull(t)) {
+      return false;
     }
-    return false;
+    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布更新前操作事件
+      this.publishOperationEvent(
+          getEntityClass(), OperationEventType.BEFORE_UPDATE_EVENT, t.getId().toString(), t);
+    }
+    // 执行更新
+    boolean ret = updateData(t);
+    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布更新操作事件
+      this.publishOperationEvent(
+          getEntityClass(), OperationEventType.UPDATED_EVENT, t.getId().toString(), t);
+    }
+    return ret;
   }
 
-  /**
-   * 数据层删除数据
-   *
-   * @param id 数据ID
-   * @return boolean
-   */
-  boolean deleteDataById(@NonNull Serializable id);
-
-  /**
-   * 删除数据前检查
-   *
-   * @param id 实体ID
-   * @return 检查后的实体ID
-   */
-  @Nullable
-  default Serializable checkBeforeDeleteObjectById(@Nullable Serializable id) {
-    if (Objects.isNull(id)) {
-      return null;
-    }
-    // 获取数据，如果有检查数据权限
-    T entity = getDetailById(id);
-    if (Objects.isNull(entity) || isReadOnly(entity)) {
-      // 没有数据权限或只读
-      return null;
-    }
-    return id;
-  }
-
-  /**
-   * 逻辑层删除对象，检查数据权限
-   *
-   * @param id ID
-   * @return boolean
-   */
-  default boolean deleteObjectById(@Nullable Serializable id) {
-    Serializable s = checkBeforeDeleteObjectById(id);
-    if (Objects.nonNull(s)) {
-      return deleteDataById(s);
-    }
-    return false;
-  }
+  //  /**
+  //   * 数据层删除数据
+  //   *
+  //   * @param id 数据ID
+  //   * @return boolean
+  //   */
+  //  boolean deleteDataById(@NonNull I id);
+  //
+  //  /**
+  //   * 删除数据前检查
+  //   *
+  //   * @param id 实体ID
+  //   * @return 检查后的实体ID
+  //   */
+  //  @Nullable
+  //  default I checkBeforeDeleteObjectById(@Nullable I id) {
+  //    if (Objects.isNull(id)) {
+  //      return null;
+  //    }
+  //    // 获取数据，如果有检查数据权限
+  //    T entity = viewResource(id);
+  //    if (Objects.isNull(entity) || isReadOnly(entity)) {
+  //      // 没有数据权限或只读
+  //      return null;
+  //    }
+  //    return id;
+  //  }
+  //
+  //  /**
+  //   * 逻辑层删除对象，检查数据权限
+  //   *
+  //   * @param id ID
+  //   * @return boolean
+  //   */
+  //  default boolean deleteObjectById(@Nullable Serializable id) {
+  //    Serializable s = checkBeforeDeleteObjectById(id);
+  //    if (Objects.nonNull(s)) {
+  //      return deleteDataById(s);
+  //    }
+  //    return false;
+  //  }
 
   /**
    * 数据层删除数据
@@ -451,57 +521,136 @@ public interface IRestfulService<T> {
    * @param entity 实体对象
    * @return boolean
    */
-  default boolean deleteObject(@Nullable T entity) {
+  default boolean deleteResource(@Nullable T entity) {
+    // 删除前检查
     T t = checkBeforeDeleteObject(entity);
-    if (Objects.nonNull(t)) {
-      return deleteData(t);
+    if (Objects.isNull(t)) {
+      return false;
     }
-    return false;
+    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布删除前操作事件
+      this.publishOperationEvent(
+          getEntityClass(), OperationEventType.BEFORE_DELETE_EVENT, t.getId().toString(), t);
+    }
+    // 执行删除
+    boolean ret = deleteData(t);
+    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布删除操作事件
+      this.publishOperationEvent(
+          getEntityClass(), OperationEventType.DELETED_EVENT, t.getId().toString(), t);
+    }
+    return ret;
   }
+
+  //  /**
+  //   * 数据层批量删除数据
+  //   *
+  //   * @param ids 数据 ID 集合
+  //   * @return boolean
+  //   */
+  //  boolean batchDeleteDataByIds(@NonNull Collection<? extends Serializable> ids);
+  //
+  //  /**
+  //   * 批量删除数据前检查
+  //   *
+  //   * @param ids 数据 ID 集合
+  //   * @return 检查后的数据 ID 集合
+  //   */
+  //  @Nullable
+  //  default Collection<? extends Serializable> checkBeforeBatchDeleteObjectsByIds(
+  //      @Nullable Collection<? extends Serializable> ids) {
+  //    if (Objects.isNull(ids) || ids.isEmpty()) {
+  //      return null;
+  //    }
+  //    // 获取数据，如果缺少则有数据没有数据权限
+  //    List<T> entities = viewResources(ids);
+  //    if (entities.size() != ids.size()) {
+  //      return null;
+  //    }
+  //    // 判断只读
+  //    if (isAnyReadOnly(entities)) {
+  //      return null;
+  //    }
+  //    return ids;
+  //  }
+  //
+  //  /**
+  //   * 逻辑层删除对象，检查数据权限
+  //   *
+  //   * @param ids ID 集合
+  //   * @return boolean
+  //   */
+  //  default boolean batchDeleteObjectsByIds(@Nullable Collection<? extends Serializable> ids) {
+  //    Collection<? extends Serializable> ss = checkBeforeBatchDeleteObjectsByIds(ids);
+  //    if (Objects.nonNull(ss)) {
+  //      return batchDeleteDataByIds(ss);
+  //    }
+  //    return false;
+  //  }
 
   /**
    * 数据层批量删除数据
    *
-   * @param ids 数据 ID 集合
+   * @param data 数据集合
    * @return boolean
    */
-  boolean batchDeleteDataByIds(@NonNull Collection<? extends Serializable> ids);
+  boolean batchDeleteData(@NonNull Collection<T> data);
 
   /**
    * 批量删除数据前检查
    *
-   * @param ids 数据 ID 集合
-   * @return 检查后的数据 ID 集合
+   * @param data 数据集合
+   * @return 检查后的数据集合
    */
   @Nullable
-  default Collection<? extends Serializable> checkBeforeBatchDeleteObjectsByIds(
-      @Nullable Collection<? extends Serializable> ids) {
-    if (Objects.isNull(ids) || ids.isEmpty()) {
+  default Collection<T> checkBeforeBatchDeleteObjects(@Nullable Collection<T> data) {
+    if (Objects.isNull(data) || data.isEmpty()) {
       return null;
     }
     // 获取数据，如果缺少则有数据没有数据权限
-    List<T> entities = getDetailByIds(ids);
-    if (entities.size() != ids.size()) {
+    List<T> entities =
+        viewResources(data.stream().map(IdEntity::getId).collect(Collectors.toSet()));
+    if (entities.size() != data.size()) {
       return null;
     }
     // 判断只读
     if (isAnyReadOnly(entities)) {
       return null;
     }
-    return ids;
+    return data;
   }
 
   /**
    * 逻辑层删除对象，检查数据权限
    *
-   * @param ids ID 集合
+   * @param data 实体集合
    * @return boolean
    */
-  default boolean batchDeleteObjectsByIds(@Nullable Collection<? extends Serializable> ids) {
-    Collection<? extends Serializable> ss = checkBeforeBatchDeleteObjectsByIds(ids);
-    if (Objects.nonNull(ss)) {
-      return batchDeleteDataByIds(ss);
+  default boolean batchDeleteResources(@Nullable Collection<T> data) {
+    // 删除前检查
+    Collection<T> ts = checkBeforeBatchDeleteObjects(data);
+    if (Objects.isNull(ts)) {
+      return false;
     }
-    return false;
+    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布删除前操作事件
+      ts.forEach(
+          t ->
+              this.publishOperationEvent(
+                  getEntityClass(),
+                  OperationEventType.BEFORE_DELETE_EVENT,
+                  t.getId().toString(),
+                  t));
+    }
+    // 执行删除
+    boolean ret = batchDeleteData(ts);
+    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
+      // 发布删除操作事件
+      ts.forEach(
+          t ->
+              this.publishOperationEvent(
+                  getEntityClass(), OperationEventType.DELETED_EVENT, t.getId().toString(), t));
+    }
+    return ret;
   }
 }

@@ -1,4 +1,4 @@
-package com.wangboot.model.flex.utils;
+package com.wangboot.model.flex;
 
 import cn.hutool.core.bean.DynaBean;
 import cn.hutool.core.convert.Convert;

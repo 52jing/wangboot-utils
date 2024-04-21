@@ -1,10 +1,12 @@
-package com.wangboot.model.flex.controller;
+package com.wangboot.model.entity.controller;
 
 import com.wangboot.core.web.exception.NotFoundException;
 import com.wangboot.core.web.response.DetailBody;
 import com.wangboot.core.web.response.ListBody;
 import com.wangboot.core.web.utils.ResponseUtils;
+import com.wangboot.core.web.utils.ServletUtils;
 import com.wangboot.model.entity.IRestfulService;
+import com.wangboot.model.entity.IdEntity;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.ParamFilterDefinition;
 import com.wangboot.model.entity.request.SearchStrategy;
@@ -12,8 +14,10 @@ import com.wangboot.model.entity.request.SortFilter;
 import com.wangboot.model.entity.utils.RequestUtils;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -21,18 +25,18 @@ import org.springframework.lang.Nullable;
 /**
  * Restful 只读控制器接口
  *
+ * @param <I> 主键类型
  * @param <T> 实体类型
  */
-public interface IRestfulReadController<T> extends IRestfulController {
+public interface IRestfulReadController<I extends Serializable, T extends IdEntity<I>> {
 
   /** 获取服务 */
   @NonNull
-  IRestfulService<T> getReadService();
+  IRestfulService<I, T> getReadService();
 
-  /** 获取实体类型 */
-  @NonNull
-  default Class<T> getReadEntityClass() {
-    return getReadService().getEntityClass();
+  @Nullable
+  default HttpServletRequest getRequest() {
+    return ServletUtils.getRequest();
   }
 
   /**
@@ -182,8 +186,8 @@ public interface IRestfulReadController<T> extends IRestfulController {
    * @return 数据
    */
   @NonNull
-  default T detail(@Nullable Serializable id) {
-    T entity = getReadService().getDetailById(id);
+  default T view(@Nullable I id) {
+    T entity = getReadService().viewResource(id);
     if (Objects.isNull(entity)) {
       throw new NotFoundException();
     }
@@ -197,8 +201,8 @@ public interface IRestfulReadController<T> extends IRestfulController {
    * @return 响应对象
    */
   @NonNull
-  default ResponseEntity<?> detailResponse(@Nullable Serializable id) {
-    return ResponseUtils.success(DetailBody.ok(detail(id)));
+  default ResponseEntity<?> viewResponse(@Nullable I id) {
+    return ResponseUtils.success(DetailBody.ok(view(id)));
   }
 
   /**
@@ -210,7 +214,7 @@ public interface IRestfulReadController<T> extends IRestfulController {
   @NonNull
   default ListBody<T> listAll() {
     return getReadService()
-        .getListAll(parseSortFilters(), parseParamFilters(), parseSearchFilters());
+        .listResourcesAll(parseSortFilters(), parseParamFilters(), parseSearchFilters());
   }
 
   /**
@@ -232,7 +236,7 @@ public interface IRestfulReadController<T> extends IRestfulController {
   @NonNull
   default ListBody<T> listPage() {
     return getReadService()
-        .getListPage(
+        .listResourcesPage(
             parseSortFilters(),
             parseParamFilters(),
             parseSearchFilters(),
@@ -256,8 +260,8 @@ public interface IRestfulReadController<T> extends IRestfulController {
    * @return 数据
    */
   @NonNull
-  default ListBody<T> listRoot() {
-    return getReadService().getRootData();
+  default List<T> listRoot() {
+    return getReadService().listRootResources();
   }
 
   /**
@@ -267,7 +271,8 @@ public interface IRestfulReadController<T> extends IRestfulController {
    */
   @NonNull
   default ResponseEntity<?> listRootResponse() {
-    return ResponseUtils.success(listRoot());
+    List<T> data = listRoot();
+    return ResponseUtils.success(ListBody.ok(data));
   }
 
   /**
@@ -277,8 +282,8 @@ public interface IRestfulReadController<T> extends IRestfulController {
    * @return 数据
    */
   @NonNull
-  default ListBody<T> listDirectChildren(@Nullable Serializable id) {
-    return getReadService().getDirectChildren(id);
+  default List<T> listDirectChildren(@Nullable I id) {
+    return getReadService().listDirectChildren(id);
   }
 
   /**
@@ -288,8 +293,9 @@ public interface IRestfulReadController<T> extends IRestfulController {
    * @return 响应对象
    */
   @NonNull
-  default ResponseEntity<?> listDirectChildrenResponse(@Nullable Serializable id) {
-    return ResponseUtils.success(listDirectChildren(id));
+  default ResponseEntity<?> listDirectChildrenResponse(@Nullable I id) {
+    List<T> data = listDirectChildren(id);
+    return ResponseUtils.success(ListBody.ok(data));
   }
 
   /**
@@ -299,8 +305,8 @@ public interface IRestfulReadController<T> extends IRestfulController {
    * @return 数据
    */
   @NonNull
-  default ListBody<T> listDirectChildren(@Nullable Collection<? extends Serializable> ids) {
-    return getReadService().getDirectChildren(ids);
+  default List<T> listDirectChildren(@Nullable Collection<I> ids) {
+    return getReadService().listDirectChildren(ids);
   }
 
   /**
@@ -310,8 +316,8 @@ public interface IRestfulReadController<T> extends IRestfulController {
    * @return 响应对象
    */
   @NonNull
-  default ResponseEntity<?> listDirectChildrenResponse(
-      @Nullable Collection<? extends Serializable> ids) {
-    return ResponseUtils.success(listDirectChildren(ids));
+  default ResponseEntity<?> listDirectChildrenResponse(@Nullable Collection<I> ids) {
+    List<T> data = listDirectChildren(ids);
+    return ResponseUtils.success(ListBody.ok(data));
   }
 }

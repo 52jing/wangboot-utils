@@ -9,23 +9,27 @@ import com.wangboot.model.dataauthority.authorizer.IDataAuthorizer;
 import com.wangboot.model.entity.FieldConstants;
 import com.wangboot.model.entity.IRestfulService;
 import com.wangboot.model.entity.IUniqueEntity;
+import com.wangboot.model.entity.IdEntity;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.SortFilter;
-import com.wangboot.model.flex.utils.FlexRestHelper;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
  * 基于 MyBatis Flex 的 Restful 服务接口
  *
- * @param <T> 实体类
+ * @param <I> 主键类型
+ * @param <T> 实体类型
  * @author wwtg99
  */
-public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> {
+public interface IFlexRestfulService<I extends Serializable, T extends IdEntity<I>>
+    extends IService<T>, IRestfulService<I, T> {
 
   /** 获取实体类型 */
   @Override
@@ -42,7 +46,7 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    */
   @Override
   @Nullable
-  default T getDataById(@NonNull Serializable id) {
+  default T getDataById(@NonNull I id) {
     return getById(id);
   }
 
@@ -54,7 +58,7 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    */
   @Override
   @NonNull
-  default List<T> getDataByIds(@NonNull Collection<? extends Serializable> ids) {
+  default List<T> getDataByIds(@NonNull Collection<I> ids) {
     return list(query().in(FieldConstants.PRIMARY_KEY, ids));
   }
 
@@ -91,7 +95,7 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    */
   @Override
   @NonNull
-  default ListBody<T> getListAll(
+  default ListBody<T> listResourcesAll(
       @Nullable SortFilter[] sortFilters,
       @Nullable FieldFilter[] fieldFilters,
       @Nullable FieldFilter[] searchFilters) {
@@ -121,7 +125,7 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    */
   @Override
   @NonNull
-  default ListBody<T> getListPage(
+  default ListBody<T> listResourcesPage(
       @Nullable SortFilter[] sortFilters,
       @Nullable FieldFilter[] fieldFilters,
       @Nullable FieldFilter[] searchFilters,
@@ -161,16 +165,12 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    */
   @Override
   @NonNull
-  default ListBody<T> getRootData() {
+  default List<T> listRootResources() {
     QueryWrapper wrapper = getRootQueryWrapper();
     // 限制数据权限
     wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
     // 限制根节点
-    List<T> data = list(FlexRestHelper.buildRootQueryWrapper(wrapper));
-    ListBody<T> listBody = new ListBody<>();
-    listBody.setData(data);
-    listBody.setTotal(data.size());
-    return listBody;
+    return list(FlexRestHelper.buildRootQueryWrapper(wrapper));
   }
 
   /**
@@ -190,7 +190,7 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    * @return 数据数量
    */
   @Override
-  default long getDirectChildrenCount(@Nullable Serializable id) {
+  default long getDirectChildrenCount(@Nullable I id) {
     if (Objects.isNull(id)) {
       return 0;
     }
@@ -209,19 +209,15 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    */
   @Override
   @NonNull
-  default ListBody<T> getDirectChildren(@Nullable Serializable id) {
+  default List<T> listDirectChildren(@Nullable I id) {
     if (Objects.isNull(id)) {
-      return new ListBody<>();
+      return Collections.emptyList();
     }
     QueryWrapper wrapper = getDirectChildrenQueryWrapper();
     // 限制数据权限
     wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
     // 限制子节点
-    List<T> data = list(FlexRestHelper.buildDirectChildrenQueryWrapper(wrapper, id));
-    ListBody<T> listBody = new ListBody<>();
-    listBody.setData(data);
-    listBody.setTotal(data.size());
-    return listBody;
+    return list(FlexRestHelper.buildDirectChildrenQueryWrapper(wrapper, id));
   }
 
   /**
@@ -232,19 +228,15 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
    */
   @Override
   @NonNull
-  default ListBody<T> getDirectChildren(@Nullable Collection<? extends Serializable> ids) {
+  default List<T> listDirectChildren(@Nullable Collection<I> ids) {
     if (Objects.isNull(ids) || ids.isEmpty()) {
-      return new ListBody<>();
+      return Collections.emptyList();
     }
     QueryWrapper wrapper = getDirectChildrenQueryWrapper();
     // 限制数据权限
     wrapper = buildDataAuthorityQueryWrapper(wrapper, getDataAuthorizer());
     // 限制子节点
-    List<T> data = list(FlexRestHelper.buildDirectChildrenQueryWrapper(wrapper, ids));
-    ListBody<T> listBody = new ListBody<>();
-    listBody.setData(data);
-    listBody.setTotal(data.size());
-    return listBody;
+    return list(FlexRestHelper.buildDirectChildrenQueryWrapper(wrapper, ids));
   }
 
   /**
@@ -305,16 +297,16 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
     return updateById(data, false);
   }
 
-  /**
-   * 数据层删除数据
-   *
-   * @param id 数据ID
-   * @return boolean
-   */
-  @Override
-  default boolean deleteDataById(@NonNull Serializable id) {
-    return removeById(id);
-  }
+  //  /**
+  //   * 数据层删除数据
+  //   *
+  //   * @param id 数据ID
+  //   * @return boolean
+  //   */
+  //  @Override
+  //  default boolean deleteDataById(@NonNull Serializable id) {
+  //    return removeById(id);
+  //  }
 
   /**
    * 数据层删除数据
@@ -330,11 +322,11 @@ public interface IFlexRestfulService<T> extends IService<T>, IRestfulService<T> 
   /**
    * 数据层批量删除数据
    *
-   * @param ids 数据 ID 集合
+   * @param data 数据集合
    * @return boolean
    */
   @Override
-  default boolean batchDeleteDataByIds(@NonNull Collection<? extends Serializable> ids) {
-    return removeByIds(ids);
+  default boolean batchDeleteData(@NonNull Collection<T> data) {
+    return removeByIds(data.stream().map(IdEntity::getId).collect(Collectors.toSet()));
   }
 }

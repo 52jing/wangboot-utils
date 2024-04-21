@@ -11,7 +11,6 @@ import java.util.UUID;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 import lombok.Generated;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
@@ -173,6 +172,19 @@ public class ServletUtils {
     return getParameterToBool(getRequest(), name, null);
   }
 
+  /** 获取请求参数数组 */
+  @NonNull
+  public static String[] getParameterValues(
+      @Nullable HttpServletRequest request, @Nullable String name) {
+    return Objects.nonNull(request) ? request.getParameterValues(name) : new String[] {};
+  }
+
+  /** 获取请求参数数组 */
+  @NonNull
+  public static String[] getParameterValues(@Nullable String name) {
+    return getParameterValues(getRequest(), name);
+  }
+
   /** 获取所有请求参数 */
   @NonNull
   public static Map<String, String[]> getParameterMap(@Nullable HttpServletRequest request) {
@@ -183,18 +195,6 @@ public class ServletUtils {
   @NonNull
   public static Map<String, String[]> getParameterMap() {
     return getParameterMap(getRequest());
-  }
-
-  /** 获取 session */
-  @Nullable
-  public static HttpSession getSession(@Nullable HttpServletRequest request) {
-    return Objects.nonNull(request) ? request.getSession() : null;
-  }
-
-  /** 获取 session */
-  @Nullable
-  public static HttpSession getSession() {
-    return getSession(getRequest());
   }
 
   /** 生成请求ID并保存到请求对象 */
