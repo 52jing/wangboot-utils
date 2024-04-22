@@ -12,14 +12,15 @@ import com.wangboot.model.entity.IUniqueEntity;
 import com.wangboot.model.entity.IdEntity;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.SortFilter;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 /**
  * 基于 MyBatis Flex 的 Restful 服务接口
@@ -278,12 +279,12 @@ public interface IFlexRestfulService<I extends Serializable, T extends IdEntity<
   /**
    * 数据层批量创建数据
    *
-   * @param data 数据集合
+   * @param entities 数据集合
    * @return boolean
    */
   @Override
-  default boolean batchSaveData(@NonNull Collection<T> data) {
-    return saveBatch(data);
+  default boolean batchSaveData(@NonNull Collection<T> entities) {
+    return saveBatch(entities);
   }
 
   /**
@@ -296,17 +297,6 @@ public interface IFlexRestfulService<I extends Serializable, T extends IdEntity<
   default boolean updateData(@NonNull T data) {
     return updateById(data, false);
   }
-
-  //  /**
-  //   * 数据层删除数据
-  //   *
-  //   * @param id 数据ID
-  //   * @return boolean
-  //   */
-  //  @Override
-  //  default boolean deleteDataById(@NonNull Serializable id) {
-  //    return removeById(id);
-  //  }
 
   /**
    * 数据层删除数据
@@ -322,11 +312,11 @@ public interface IFlexRestfulService<I extends Serializable, T extends IdEntity<
   /**
    * 数据层批量删除数据
    *
-   * @param data 数据集合
+   * @param entities 数据集合
    * @return boolean
    */
   @Override
-  default boolean batchDeleteData(@NonNull Collection<T> data) {
-    return removeByIds(data.stream().map(IdEntity::getId).collect(Collectors.toSet()));
+  default boolean batchDeleteData(@NonNull Collection<T> entities) {
+    return removeByIds(entities.stream().map(IdEntity::getId).collect(Collectors.toSet()));
   }
 }

@@ -31,9 +31,6 @@ import org.springframework.lang.Nullable;
 public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
     extends IOperationEventPublisher {
 
-  /** ID 分隔符 */
-  //  String IDS_SEP = ",";
-
   /**
    * 获取当前用户ID
    *
@@ -313,10 +310,10 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
   /**
    * 数据层批量创建数据
    *
-   * @param data 数据集合
+   * @param entities 数据集合
    * @return boolean
    */
-  boolean batchSaveData(@NonNull Collection<T> data);
+  boolean batchSaveData(@NonNull Collection<T> entities);
 
   /**
    * 批量创建对象前检查
@@ -440,48 +437,6 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
     return ret;
   }
 
-  //  /**
-  //   * 数据层删除数据
-  //   *
-  //   * @param id 数据ID
-  //   * @return boolean
-  //   */
-  //  boolean deleteDataById(@NonNull I id);
-  //
-  //  /**
-  //   * 删除数据前检查
-  //   *
-  //   * @param id 实体ID
-  //   * @return 检查后的实体ID
-  //   */
-  //  @Nullable
-  //  default I checkBeforeDeleteObjectById(@Nullable I id) {
-  //    if (Objects.isNull(id)) {
-  //      return null;
-  //    }
-  //    // 获取数据，如果有检查数据权限
-  //    T entity = viewResource(id);
-  //    if (Objects.isNull(entity) || isReadOnly(entity)) {
-  //      // 没有数据权限或只读
-  //      return null;
-  //    }
-  //    return id;
-  //  }
-  //
-  //  /**
-  //   * 逻辑层删除对象，检查数据权限
-  //   *
-  //   * @param id ID
-  //   * @return boolean
-  //   */
-  //  default boolean deleteObjectById(@Nullable Serializable id) {
-  //    Serializable s = checkBeforeDeleteObjectById(id);
-  //    if (Objects.nonNull(s)) {
-  //      return deleteDataById(s);
-  //    }
-  //    return false;
-  //  }
-
   /**
    * 数据层删除数据
    *
@@ -542,93 +497,47 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
     return ret;
   }
 
-  //  /**
-  //   * 数据层批量删除数据
-  //   *
-  //   * @param ids 数据 ID 集合
-  //   * @return boolean
-  //   */
-  //  boolean batchDeleteDataByIds(@NonNull Collection<? extends Serializable> ids);
-  //
-  //  /**
-  //   * 批量删除数据前检查
-  //   *
-  //   * @param ids 数据 ID 集合
-  //   * @return 检查后的数据 ID 集合
-  //   */
-  //  @Nullable
-  //  default Collection<? extends Serializable> checkBeforeBatchDeleteObjectsByIds(
-  //      @Nullable Collection<? extends Serializable> ids) {
-  //    if (Objects.isNull(ids) || ids.isEmpty()) {
-  //      return null;
-  //    }
-  //    // 获取数据，如果缺少则有数据没有数据权限
-  //    List<T> entities = viewResources(ids);
-  //    if (entities.size() != ids.size()) {
-  //      return null;
-  //    }
-  //    // 判断只读
-  //    if (isAnyReadOnly(entities)) {
-  //      return null;
-  //    }
-  //    return ids;
-  //  }
-  //
-  //  /**
-  //   * 逻辑层删除对象，检查数据权限
-  //   *
-  //   * @param ids ID 集合
-  //   * @return boolean
-  //   */
-  //  default boolean batchDeleteObjectsByIds(@Nullable Collection<? extends Serializable> ids) {
-  //    Collection<? extends Serializable> ss = checkBeforeBatchDeleteObjectsByIds(ids);
-  //    if (Objects.nonNull(ss)) {
-  //      return batchDeleteDataByIds(ss);
-  //    }
-  //    return false;
-  //  }
-
   /**
    * 数据层批量删除数据
    *
-   * @param data 数据集合
+   * @param entities 数据集合
    * @return boolean
    */
-  boolean batchDeleteData(@NonNull Collection<T> data);
+  boolean batchDeleteData(@NonNull Collection<T> entities);
 
   /**
    * 批量删除数据前检查
    *
-   * @param data 数据集合
+   * @param entities 数据集合
    * @return 检查后的数据集合
    */
   @Nullable
-  default Collection<T> checkBeforeBatchDeleteObjects(@Nullable Collection<T> data) {
-    if (Objects.isNull(data) || data.isEmpty()) {
+  default Collection<T> checkBeforeBatchDeleteObjects(@Nullable Collection<T> entities) {
+    if (Objects.isNull(entities) || entities.isEmpty()) {
       return null;
     }
     // 获取数据，如果缺少则有数据没有数据权限
-    List<T> entities =
-        viewResources(data.stream().map(IdEntity::getId).collect(Collectors.toSet()));
-    if (entities.size() != data.size()) {
+    List<T> viewEntities =
+        viewResources(entities.stream().map(IdEntity::getId).collect(Collectors.toSet()));
+    if (viewEntities.size() != entities.size()) {
       return null;
     }
     // 判断只读
-    if (isAnyReadOnly(entities)) {
+    if (isAnyReadOnly(viewEntities)) {
       return null;
     }
-    return data;
+    return entities;
   }
 
   /**
    * 逻辑层删除对象，检查数据权限
    *
-   * @param data 实体集合
+   * @param entities 实体集合
    * @return boolean
    */
-  default boolean batchDeleteResources(@Nullable Collection<T> data) {
+  default boolean batchDeleteResources(@Nullable Collection<T> entities) {
     // 删除前检查
-    Collection<T> ts = checkBeforeBatchDeleteObjects(data);
+    Collection<T> ts = checkBeforeBatchDeleteObjects(entities);
     if (Objects.isNull(ts)) {
       return false;
     }
