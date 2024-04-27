@@ -286,7 +286,7 @@ public class AuthTest {
     IFrontendModel model = manager.validate(body);
     Assertions.assertNotNull(model);
     Assertions.assertEquals(fid, model.getId());
-    Assertions.assertFalse(model.isStaffOnly());
+    Assertions.assertFalse(model.staffOnly());
     Assertions.assertTrue(model.allowRegister());
   }
 

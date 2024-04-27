@@ -20,7 +20,7 @@ public class MockFrontend implements IFrontendModel {
   private boolean staffOnly;
   private boolean allowRegister;
 
-  public boolean isStaffOnly() {
+  public boolean staffOnly() {
     return this.staffOnly;
   }
 

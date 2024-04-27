@@ -14,7 +14,7 @@ import org.springframework.lang.NonNull;
 public class StaffOnlyCheck implements ILoginMiddleware {
   @Override
   public boolean afterLogin(@NonNull ILoginBody body, @NonNull ILoginUser loginUser) {
-    if (loginUser.getFrontend().isStaffOnly() && !loginUser.getUser().checkStaff()) {
+    if (loginUser.getFrontend().staffOnly() && !loginUser.getUser().checkStaff()) {
       throw new LoginFailedException("require staff only but user is not staff");
     }
     return true;

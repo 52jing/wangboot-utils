@@ -19,7 +19,7 @@ public interface IFrontendModel extends Serializable {
   String getType();
 
   /** 是否仅内部用户使用 */
-  boolean isStaffOnly();
+  boolean staffOnly();
 
   /** 是否允许注册 */
   boolean allowRegister();

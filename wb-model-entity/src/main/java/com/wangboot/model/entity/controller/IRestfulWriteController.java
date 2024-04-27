@@ -115,40 +115,6 @@ public interface IRestfulWriteController<I extends Serializable, T extends IdEnt
     return ResponseUtils.deleted();
   }
 
-  //  /**
-  //   * 删除对象
-  //   *
-  //   * @param id ID
-  //   */
-  //  default void deleteDataById(@Nullable Serializable id) {
-  //    if (Objects.isNull(id)) {
-  //      throw new DeleteFailedException("");
-  //    }
-  //    // 发布删除前操作事件
-  //    this.publishOperationEvent(
-  //      getWriteEntityClass(), OperationEventType.BEFORE_DELETE_EVENT, id.toString(), null);
-  //    // 执行删除
-  //    boolean ret = getWriteService().deleteObjectById(id);
-  //    if (ret) {
-  //      // 发布删除操作事件
-  //      this.publishOperationEvent(
-  //        getWriteEntityClass(), OperationEventType.DELETED_EVENT, id.toString(), null);
-  //    } else {
-  //      throw new DeleteFailedException(id);
-  //    }
-  //  }
-  //
-  //  /**
-  //   * 删除对象接口
-  //   *
-  //   * @param id ID
-  //   * @return 响应对象
-  //   */
-  //  default ResponseEntity<?> deleteDataByIdResponse(@Nullable Serializable id) {
-  //    deleteDataById(id);
-  //    return ResponseUtils.deleted();
-  //  }
-
   /**
    * 批量删除对象
    *
@@ -161,7 +127,7 @@ public interface IRestfulWriteController<I extends Serializable, T extends IdEnt
     }
     List<T> entities = getWriteService().viewResources(ids);
     // 执行删除
-    boolean ret = getWriteService().batchDeleteData(entities);
+    boolean ret = getWriteService().batchDeleteResources(entities);
     if (ret) {
       return true;
     } else {
