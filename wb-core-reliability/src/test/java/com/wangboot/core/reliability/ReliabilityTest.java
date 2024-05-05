@@ -3,8 +3,8 @@ package com.wangboot.core.reliability;
 import cn.hutool.core.util.RandomUtil;
 import com.wangboot.core.reliability.blacklist.CacheBlacklistHolder;
 import com.wangboot.core.reliability.blacklist.IBlacklistHolder;
-import com.wangboot.core.reliability.countlimit.CacheCountLimit;
-import com.wangboot.core.reliability.countlimit.ICountLimit;
+import com.wangboot.core.reliability.counter.CacheCounter;
+import com.wangboot.core.reliability.counter.ICounter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,27 +12,27 @@ import org.junit.jupiter.api.Test;
 public class ReliabilityTest {
   @Test
   @SneakyThrows
-  public void testRateLimit() {
-    ICountLimit rateLimit = new CacheCountLimit(3, 1);
+  public void testCountLimit() {
+    ICounter counter = new CacheCounter(1);
     String k1 = RandomUtil.randomString(6);
-    Assertions.assertFalse(rateLimit.isLimited(k1));
-    rateLimit.increment(k1);
-    Assertions.assertFalse(rateLimit.isLimited(k1));
-    rateLimit.increment(k1);
-    Assertions.assertFalse(rateLimit.isLimited(k1));
-    rateLimit.increment(k1);
-    Assertions.assertTrue(rateLimit.isLimited(k1));
+    Assertions.assertEquals(0, counter.getCount(k1));
+    Assertions.assertEquals(1, counter.increment(k1));
+    Assertions.assertEquals(2, counter.increment(k1));
     Thread.sleep(1100);
-    Assertions.assertFalse(rateLimit.isLimited(k1));
+    Assertions.assertEquals(0, counter.getCount(k1));
+    Assertions.assertEquals(1, counter.increment(k1));
+    Assertions.assertEquals(2, counter.increment(k1));
+    counter.reset(k1);
+    Assertions.assertEquals(0, counter.getCount(k1));
   }
 
   @Test
   @SneakyThrows
   public void testBlacklist() {
-    IBlacklistHolder blacklistHolder = new CacheBlacklistHolder("test", 1000);
+    IBlacklistHolder blacklistHolder = new CacheBlacklistHolder("test", 1);
     String token1 = RandomUtil.randomString(32);
     Assertions.assertFalse(blacklistHolder.inBlacklist(token1));
-    blacklistHolder.addBlacklist(token1, 1000);
+    blacklistHolder.addBlacklist(token1, 1);
     Assertions.assertTrue(blacklistHolder.inBlacklist(token1));
     blacklistHolder.removeBlacklist(token1);
     Assertions.assertFalse(blacklistHolder.inBlacklist(token1));

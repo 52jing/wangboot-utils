@@ -10,7 +10,8 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
 /**
- * 登录验证管理器
+ * 登录验证管理器<br>
+ * 注册认证提供者，根据认证提供者判断用户是否认证成功。
  *
  * @author wwtg99
  */
@@ -18,6 +19,12 @@ public class AuthenticationManager {
   private final List<String> providerList = new ArrayList<>();
   private final Map<String, IAuthenticationProvider> providerMap = new HashMap<>();
 
+  /**
+   * 注册认证提供者
+   *
+   * @param name 名称
+   * @param provider 认证提供者
+   */
   public void addProvider(String name, @NonNull IAuthenticationProvider provider) {
     if (StringUtils.hasText(name)) {
       this.providerMap.put(name, provider);
@@ -25,6 +32,12 @@ public class AuthenticationManager {
     }
   }
 
+  /**
+   * 根据名称获取认证提供者
+   *
+   * @param name 名称
+   * @return 认证提供者
+   */
   @Nullable
   public IAuthenticationProvider getProvider(String name) {
     if (StringUtils.hasText(name)) {
@@ -33,12 +46,17 @@ public class AuthenticationManager {
     return null;
   }
 
+  /**
+   * 获取所有认证提供者
+   *
+   * @return 认证提供者列表
+   */
   @NonNull
   public List<IAuthenticationProvider> getProviderList() {
     return this.providerList.stream().map(providerMap::get).collect(Collectors.toList());
   }
 
-  /** 根据登录类型或逐个验证登录提供者 */
+  /** 根据登录类型或逐个验证认证提供者 */
   @NonNull
   public IUserModel authenticate(@NonNull ILoginBody loginBody) {
     if (StringUtils.hasText(loginBody.getLoginType())) {

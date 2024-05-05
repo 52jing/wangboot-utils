@@ -17,12 +17,16 @@ public interface IUserModel extends Serializable {
 
   String getPassword();
 
+  /** 校验超级管理员 */
   boolean checkSuperuser();
 
+  /** 校验内部用户 */
   boolean checkStaff();
 
+  /** 校验用户是否启用 */
   boolean checkEnabled();
 
+  /** 校验用户是否锁定 */
   boolean checkLocked();
 
   @Nullable

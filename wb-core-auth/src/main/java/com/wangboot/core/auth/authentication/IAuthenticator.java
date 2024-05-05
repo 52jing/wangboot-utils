@@ -6,7 +6,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
- * 认证验证器接口
+ * 认证验证器接口<br>
+ * 用于验证用户令牌。
  *
  * @author wwtg99
  */

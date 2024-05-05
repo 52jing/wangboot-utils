@@ -1,13 +1,12 @@
 package com.wangboot.core.auth.middleware.login;
 
+import com.wangboot.core.auth.context.ILoginUser;
 import com.wangboot.core.auth.exception.LoginLockedException;
 import com.wangboot.core.auth.middleware.ILoginMiddleware;
 import com.wangboot.core.auth.model.ILoginBody;
-import com.wangboot.core.reliability.loginlock.IFailedLock;
-import java.util.Objects;
+import com.wangboot.core.auth.user.IUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
 
 /**
  * 登录锁定检查
@@ -17,13 +16,13 @@ import org.springframework.lang.Nullable;
 @RequiredArgsConstructor
 public class LoginFailedLock implements ILoginMiddleware {
 
-  @Nullable private final IFailedLock failedLock;
+  private final IUserService userService;
 
   @Override
-  public ILoginBody beforeLogin(@NonNull ILoginBody body) {
-    if (Objects.nonNull(this.failedLock) && this.failedLock.isLocked(body.getUsername())) {
-      throw new LoginLockedException(body.getUsername());
+  public boolean afterLogin(@NonNull ILoginBody body, @NonNull ILoginUser loginUser) {
+    if (this.userService.isUserLocked(loginUser.getUser().getUserId())) {
+      throw new LoginLockedException(loginUser.getUser().getUsername());
     }
-    return body;
+    return true;
   }
 }

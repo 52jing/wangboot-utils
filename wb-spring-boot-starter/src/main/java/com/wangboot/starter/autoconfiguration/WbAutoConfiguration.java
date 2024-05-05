@@ -5,6 +5,7 @@ import com.wangboot.core.auth.authentication.IAuthenticator;
 import com.wangboot.core.auth.authentication.authenticator.TokenAuthenticator;
 import com.wangboot.core.auth.authorization.IAuthorizerService;
 import com.wangboot.core.auth.frontend.IFrontendService;
+import com.wangboot.core.auth.security.LoginRestriction;
 import com.wangboot.core.auth.token.ITokenManager;
 import com.wangboot.core.auth.token.jwt.JwtTokenManager;
 import com.wangboot.core.auth.user.IUserService;
@@ -90,6 +91,12 @@ public class WbAutoConfiguration {
     return new CacheBlacklistHolder(
         this.wbProperties.getAuth().getBlacklistPrefix(),
         this.wbProperties.getAuth().getBlacklistTtl());
+  }
+
+  /** 登录限制器 */
+  @Bean
+  public LoginRestriction loginRestriction() {
+    return new LoginRestriction();
   }
 
   /** 登录计数器 */

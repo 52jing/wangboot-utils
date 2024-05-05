@@ -6,7 +6,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 /**
- * 认证提供者
+ * 认证提供者接口<br>
+ * 用于登录认证。
  *
  * @author wwtg99
  */

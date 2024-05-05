@@ -41,6 +41,11 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>wang.52jing</groupId>
             <artifactId>wb-core-crypto</artifactId>
             <version>${project.parent.version}</version>

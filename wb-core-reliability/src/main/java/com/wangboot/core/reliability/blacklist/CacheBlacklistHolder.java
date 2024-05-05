@@ -11,25 +11,27 @@ import org.springframework.util.StringUtils;
  */
 public class CacheBlacklistHolder implements IBlacklistHolder {
 
+  /** 前缀 */
   @Getter private final String prefix;
 
-  @Getter private final long ttl;
+  /** 加入黑名单时间（秒） */
+  @Getter private final long secs;
 
-  public CacheBlacklistHolder(String prefix, long ttl) {
+  public CacheBlacklistHolder(String prefix, long secs) {
     this.prefix = prefix;
-    this.ttl = ttl;
+    this.secs = secs;
   }
 
   @Override
-  public void addBlacklist(String key, long ttl) {
+  public void addBlacklist(String key, long secs) {
     if (StringUtils.hasText(key)) {
-      CacheUtil.put(prefix + key, "1", ttl);
+      CacheUtil.put(prefix + key, "1", secs * 1000);
     }
   }
 
   @Override
   public void addBlacklist(String key) {
-    this.addBlacklist(key, this.ttl);
+    this.addBlacklist(key, this.secs);
   }
 
   @Override

@@ -24,6 +24,8 @@ public class UserEventLog {
   private String event;
   /** 事件状态 */
   @NonNull private LogStatus status;
+  /** 用户名 */
+  private String username;
   /** 登录用户 */
   @Nullable private ILoginUser loginUser;
   /** 消息 */

@@ -10,9 +10,9 @@ public interface IBlacklistHolder {
    * 加入黑名单
    *
    * @param key 键
-   * @param ttl 存活时间（毫秒）
+   * @param secs 存活时间（秒）
    */
-  void addBlacklist(String key, long ttl);
+  void addBlacklist(String key, long secs);
 
   /**
    * 加入黑名单

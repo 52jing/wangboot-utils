@@ -166,7 +166,8 @@ public class AuthFlow implements IEventPublisher {
         loginBody = middleware.beforeLogin(loginBody);
       } catch (RuntimeException e) {
         // 中间件抛出异常
-        this.publishUserEvent(LogStatus.FAILED, EVENT_LOGIN, null, e.getMessage());
+        this.publishUserEvent(
+            LogStatus.FAILED, EVENT_LOGIN, body.getUsername(), null, e.getMessage());
         throw e;
       }
       if (Objects.isNull(loginBody)) {
@@ -174,6 +175,7 @@ public class AuthFlow implements IEventPublisher {
         this.publishUserEvent(
             LogStatus.FAILED,
             EVENT_LOGIN,
+            body.getUsername(),
             null,
             middleware.getClass().getSimpleName() + " before authentication failed");
         throw new LoginFailedException();
@@ -185,7 +187,8 @@ public class AuthFlow implements IEventPublisher {
       userModel = this.authenticationManager.authenticate(loginBody);
     } catch (RuntimeException e) {
       // 认证抛出异常
-      this.publishUserEvent(LogStatus.FAILED, EVENT_LOGIN, null, e.getMessage());
+      this.publishUserEvent(
+          LogStatus.FAILED, EVENT_LOGIN, body.getUsername(), null, e.getMessage());
       throw e;
     }
     // 前端验证
@@ -194,7 +197,8 @@ public class AuthFlow implements IEventPublisher {
       frontendModel = this.frontendManager.validate(loginBody);
     } catch (RuntimeException e) {
       // 认证抛出异常
-      this.publishUserEvent(LogStatus.FAILED, EVENT_LOGIN, null, e.getMessage());
+      this.publishUserEvent(
+          LogStatus.FAILED, EVENT_LOGIN, body.getUsername(), null, e.getMessage());
       throw e;
     }
     if (Objects.isNull(frontendModel)) {
@@ -211,7 +215,8 @@ public class AuthFlow implements IEventPublisher {
         ret = middleware.afterLogin(loginBody, loginUser);
       } catch (RuntimeException e) {
         // 中间件抛出异常
-        this.publishUserEvent(LogStatus.FAILED, EVENT_LOGIN, null, e.getMessage());
+        this.publishUserEvent(
+            LogStatus.FAILED, EVENT_LOGIN, body.getUsername(), null, e.getMessage());
         throw e;
       }
       if (!ret) {
@@ -219,6 +224,7 @@ public class AuthFlow implements IEventPublisher {
         this.publishUserEvent(
             LogStatus.FAILED,
             EVENT_LOGIN,
+            body.getUsername(),
             null,
             middleware.getClass().getSimpleName() + " after authentication failed");
         throw new LoginFailedException();
@@ -249,11 +255,12 @@ public class AuthFlow implements IEventPublisher {
     TokenPair tokenPair = this.generateTokenPair(loginUser);
     if (Objects.nonNull(tokenPair)) {
       // 认证成功
-      this.publishUserEvent(LogStatus.SUCCESS, EVENT_LOGIN, loginUser, "");
+      this.publishUserEvent(LogStatus.SUCCESS, EVENT_LOGIN, body.getUsername(), loginUser, "");
       return tokenPair;
     } else {
       // 中间件返回false
-      this.publishUserEvent(LogStatus.FAILED, EVENT_LOGIN, null, "token generation failed");
+      this.publishUserEvent(
+          LogStatus.FAILED, EVENT_LOGIN, body.getUsername(), null, "token generation failed");
       throw new LoginFailedException();
     }
   }
@@ -267,7 +274,12 @@ public class AuthFlow implements IEventPublisher {
         logoutBody = middleware.beforeLogout(logoutBody, loginUser);
       } catch (RuntimeException e) {
         // 中间件抛出异常
-        this.publishUserEvent(LogStatus.FAILED, EVENT_LOGOUT, loginUser, e.getMessage());
+        this.publishUserEvent(
+            LogStatus.FAILED,
+            EVENT_LOGOUT,
+            loginUser.getUser().getUsername(),
+            loginUser,
+            e.getMessage());
         throw e;
       }
       if (Objects.isNull(logoutBody)) {
@@ -275,6 +287,7 @@ public class AuthFlow implements IEventPublisher {
         this.publishUserEvent(
             LogStatus.FAILED,
             EVENT_LOGOUT,
+            loginUser.getUser().getUsername(),
             loginUser,
             middleware.getClass().getSimpleName() + " before logout failed");
         throw new LogoutFailedException();
@@ -283,7 +296,12 @@ public class AuthFlow implements IEventPublisher {
     // 登出
     boolean result = this.userService.logout(loginUser.getUser());
     if (!result) {
-      this.publishUserEvent(LogStatus.FAILED, EVENT_LOGOUT, loginUser, "logout failed");
+      this.publishUserEvent(
+          LogStatus.FAILED,
+          EVENT_LOGOUT,
+          loginUser.getUser().getUsername(),
+          loginUser,
+          "logout failed");
       throw new LogoutFailedException();
     }
     // 登出后中间件检查
@@ -293,7 +311,12 @@ public class AuthFlow implements IEventPublisher {
         ret = middleware.afterLogout(logoutBody, loginUser);
       } catch (RuntimeException e) {
         // 中间件抛出异常
-        this.publishUserEvent(LogStatus.FAILED, EVENT_LOGOUT, loginUser, e.getMessage());
+        this.publishUserEvent(
+            LogStatus.FAILED,
+            EVENT_LOGOUT,
+            loginUser.getUser().getUsername(),
+            loginUser,
+            e.getMessage());
         throw e;
       }
       if (!ret) {
@@ -301,13 +324,15 @@ public class AuthFlow implements IEventPublisher {
         this.publishUserEvent(
             LogStatus.FAILED,
             EVENT_LOGOUT,
+            loginUser.getUser().getUsername(),
             loginUser,
             middleware.getClass().getSimpleName() + " after logout failed");
         throw new LogoutFailedException();
       }
     }
     // 登出成功
-    this.publishUserEvent(LogStatus.SUCCESS, EVENT_LOGOUT, loginUser, "");
+    this.publishUserEvent(
+        LogStatus.SUCCESS, EVENT_LOGOUT, loginUser.getUser().getUsername(), loginUser, "");
     return true;
   }
 
@@ -411,12 +436,17 @@ public class AuthFlow implements IEventPublisher {
 
   /** 发布用户事件 */
   public void publishUserEvent(
-      @NonNull LogStatus status, String event, @Nullable ILoginUser loginUser, String message) {
+      @NonNull LogStatus status,
+      String event,
+      String username,
+      @Nullable ILoginUser loginUser,
+      String message) {
     this.publishEvent(
         new UserEvent(
             UserEventLog.builder()
                 .status(status)
                 .event(Optional.ofNullable(event).orElse(""))
+                .username(username)
                 .loginUser(loginUser)
                 .message(Optional.ofNullable(message).orElse(""))
                 .build(),

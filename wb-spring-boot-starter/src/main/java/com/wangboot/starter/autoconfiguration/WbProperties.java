@@ -2,6 +2,7 @@ package com.wangboot.starter.autoconfiguration;
 
 import cn.hutool.captcha.generator.CodeGenerator;
 import cn.hutool.captcha.generator.RandomGenerator;
+import com.wangboot.core.auth.security.LoginRestrictionStrategy;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -111,21 +112,13 @@ public class WbProperties {
     @Min(0)
     private int blacklistTtl = 2592000;
 
-    /** 登录失败锁定次数，0 表示不锁定 */
-    @Min(0)
-    private int loginFailedThreshold = 0;
-
     /** 登录失败累计周期（秒） */
     @Min(0)
     private long loginFailedCheckSeconds = 300L;
 
-    /** 登录失败锁定时间（秒） */
-    @Min(0)
-    private long loginFailedLockSeconds = 1800L;
-
     /** 登录限制策略 */
-    //    private LoginRestrictionStrategy loginRestrictionStrategy =
-    //      LoginRestrictionStrategy.NO_RESTRICTION;
+    private LoginRestrictionStrategy loginRestrictionStrategy =
+        LoginRestrictionStrategy.NO_RESTRICTION;
   }
 
   @Data

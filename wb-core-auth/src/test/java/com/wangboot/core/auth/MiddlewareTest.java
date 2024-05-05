@@ -3,7 +3,10 @@ package com.wangboot.core.auth;
 import cn.hutool.core.util.RandomUtil;
 import com.wangboot.core.auth.context.ILoginUser;
 import com.wangboot.core.auth.context.LoginUser;
-import com.wangboot.core.auth.exception.*;
+import com.wangboot.core.auth.exception.CaptchaMismatchException;
+import com.wangboot.core.auth.exception.KickedOutException;
+import com.wangboot.core.auth.exception.LoginFailedException;
+import com.wangboot.core.auth.exception.LogoutFailedException;
 import com.wangboot.core.auth.frontend.impl.MockFrontend;
 import com.wangboot.core.auth.middleware.filter.AccessTokenTypeFilter;
 import com.wangboot.core.auth.middleware.filter.BlacklistFilter;
@@ -11,7 +14,6 @@ import com.wangboot.core.auth.middleware.filter.LoginRestrictionFilter;
 import com.wangboot.core.auth.middleware.filter.UserStatusFilter;
 import com.wangboot.core.auth.middleware.generatetoken.LoginRestrictionGuard;
 import com.wangboot.core.auth.middleware.login.CaptchaValidation;
-import com.wangboot.core.auth.middleware.login.LoginFailedLock;
 import com.wangboot.core.auth.middleware.login.StaffOnlyCheck;
 import com.wangboot.core.auth.middleware.logout.BlacklistHandler;
 import com.wangboot.core.auth.middleware.logout.UserTokenValidation;
@@ -28,10 +30,6 @@ import com.wangboot.core.auth.user.impl.MockUser;
 import com.wangboot.core.auth.utils.AuthUtils;
 import com.wangboot.core.reliability.blacklist.CacheBlacklistHolder;
 import com.wangboot.core.reliability.blacklist.IBlacklistHolder;
-import com.wangboot.core.reliability.countlimit.CacheCountLimit;
-import com.wangboot.core.reliability.countlimit.ICountLimit;
-import com.wangboot.core.reliability.loginlock.CacheFailedLock;
-import com.wangboot.core.reliability.loginlock.IFailedLock;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -208,17 +206,6 @@ public class MiddlewareTest {
   @Test
   public void testLogin() {
     LoginBody loginBody = new LoginBody();
-    // LoginFailedLock
-    ICountLimit countLimit = new CacheCountLimit(5, 1);
-    IBlacklistHolder blacklistHolder = new CacheBlacklistHolder(RandomUtil.randomString(6), 1000);
-    IFailedLock failedLock = new CacheFailedLock(countLimit, blacklistHolder, 1);
-    LoginFailedLock loginFailedLock = new LoginFailedLock(failedLock);
-    String username = RandomUtil.randomString(6);
-    loginBody.setUsername(username);
-    Assertions.assertEquals(loginBody, loginFailedLock.beforeLogin(loginBody));
-    failedLock.lock(username);
-    Assertions.assertThrows(
-        LoginLockedException.class, () -> loginFailedLock.beforeLogin(loginBody));
     // StaffOnlyCheck
     StaffOnlyCheck staffOnlyCheck = new StaffOnlyCheck();
     final ILoginUser loginUser1 =

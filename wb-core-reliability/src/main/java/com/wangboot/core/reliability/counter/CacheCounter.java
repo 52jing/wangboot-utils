@@ -1,9 +1,10 @@
-package com.wangboot.core.reliability.countlimit;
+package com.wangboot.core.reliability.counter;
 
 import com.wangboot.core.cache.CacheUtil;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 import org.springframework.util.StringUtils;
 
 /**
@@ -12,37 +13,31 @@ import org.springframework.util.StringUtils;
  * @author wwtg99
  */
 @AllArgsConstructor
-public class CacheCountLimit implements ICountLimit {
+public class CacheCounter implements ICounter {
 
   private static final String DEFAULT_PREFIX = "LIMIT:";
 
-  /** 限制数量 */
-  @Getter private final long limitThreshold;
-
   /** 计数周期时间（秒） */
-  @Getter private final long periodSeconds;
+  @Getter @Setter private long periodSeconds;
 
   /** 前缀 */
   @Getter private final String prefix;
 
-  public CacheCountLimit(long limitThreshold, long periodSeconds) {
-    this(limitThreshold, periodSeconds, DEFAULT_PREFIX);
+  public CacheCounter(long periodSeconds) {
+    this(periodSeconds, DEFAULT_PREFIX);
   }
 
   @Override
-  public void increment(String key, long count) {
+  public long increment(String key, long count) {
     if (StringUtils.hasText(key)) {
       synchronized (this) {
         long n = this.getCount(key);
-        CacheUtil.put(this.getKey(key), n + count, this.periodSeconds);
+        long m = n + count;
+        CacheUtil.put(this.getKey(key), m, this.periodSeconds * 1000);
+        return m;
       }
     }
-  }
-
-  @Override
-  public boolean isLimited(String key) {
-    long n = this.getCount(key);
-    return n >= this.limitThreshold;
+    return 0;
   }
 
   @Override
