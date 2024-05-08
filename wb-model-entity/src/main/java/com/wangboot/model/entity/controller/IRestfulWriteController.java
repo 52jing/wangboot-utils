@@ -1,12 +1,12 @@
 package com.wangboot.model.entity.controller;
 
-import com.wangboot.core.web.exception.CreateFailedException;
-import com.wangboot.core.web.exception.DeleteFailedException;
-import com.wangboot.core.web.exception.UpdateFailedException;
 import com.wangboot.core.web.response.DetailBody;
 import com.wangboot.core.web.utils.ResponseUtils;
 import com.wangboot.model.entity.IRestfulService;
 import com.wangboot.model.entity.IdEntity;
+import com.wangboot.model.entity.exception.CreateFailedException;
+import com.wangboot.model.entity.exception.DeleteFailedException;
+import com.wangboot.model.entity.exception.UpdateFailedException;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;

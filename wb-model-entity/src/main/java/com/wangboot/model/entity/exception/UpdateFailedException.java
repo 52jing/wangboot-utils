@@ -1,4 +1,4 @@
-package com.wangboot.core.web.exception;
+package com.wangboot.model.entity.exception;
 
 import java.io.Serializable;
 import lombok.Generated;

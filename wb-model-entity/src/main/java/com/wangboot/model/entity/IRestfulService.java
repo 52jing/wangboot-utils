@@ -1,13 +1,13 @@
 package com.wangboot.model.entity;
 
 import com.wangboot.core.auth.utils.AuthUtils;
-import com.wangboot.core.web.exception.DuplicatedException;
 import com.wangboot.core.web.response.ListBody;
 import com.wangboot.core.web.utils.ServletUtils;
 import com.wangboot.model.dataauthority.authorizer.IDataAuthorizer;
 import com.wangboot.model.dataauthority.utils.DataAuthorityUtils;
 import com.wangboot.model.entity.event.IOperationEventPublisher;
 import com.wangboot.model.entity.event.OperationEventType;
+import com.wangboot.model.entity.exception.DuplicatedException;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.SortFilter;
 import com.wangboot.model.entity.utils.EntityUtils;

@@ -1,12 +1,12 @@
 package com.wangboot.model.entity.controller;
 
-import com.wangboot.core.web.exception.NotFoundException;
 import com.wangboot.core.web.response.DetailBody;
 import com.wangboot.core.web.response.ListBody;
 import com.wangboot.core.web.utils.ResponseUtils;
 import com.wangboot.core.web.utils.ServletUtils;
 import com.wangboot.model.entity.IRestfulService;
 import com.wangboot.model.entity.IdEntity;
+import com.wangboot.model.entity.exception.NotFoundException;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.ParamFilterDefinition;
 import com.wangboot.model.entity.request.SearchStrategy;
