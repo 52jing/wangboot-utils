@@ -53,13 +53,6 @@ public class WbProperties {
   @Min(1)
   private int uploadImageThumbSize = 200;
 
-  /** 临时文件目录 */
-  @NotBlank private String tempDir = "tmp";
-
-  /** 临时文件保留天数，0 则不删除 */
-  @Min(0)
-  private int tempRetentionDays = 10;
-
   /** 认证配置 */
   @NestedConfigurationProperty @Valid private AuthConfig auth = new AuthConfig();
 
@@ -69,17 +62,8 @@ public class WbProperties {
   /** 加密配置 */
   @NestedConfigurationProperty @Valid private CryptoConfig crypto = new CryptoConfig();
 
-  /** 对象存储配置 */
-  @NestedConfigurationProperty @Valid private OssConfig oss = new OssConfig();
-
-  /** 短信配置 */
-  @NestedConfigurationProperty @Valid private SmsConfig sms = new SmsConfig();
-
   /** 线程池配置 */
   @NestedConfigurationProperty @Valid private ThreadConfig threads = new ThreadConfig();
-
-  /** 许可证配置 */
-  @NestedConfigurationProperty @Valid private LicenseConfig lk = new LicenseConfig();
 
   /** 请求限速配置 */
   @NestedConfigurationProperty @Valid private RateLimit rateLimit = new RateLimit();
@@ -147,6 +131,9 @@ public class WbProperties {
   @Data
   @Validated
   public static class RateLimit {
+    /** 是否启用 */
+    private boolean enabled = false;
+
     /** 限制数量 */
     @Min(0)
     private long limitThreshold = 60L;
@@ -173,8 +160,6 @@ public class WbProperties {
     @NestedConfigurationProperty @Valid private ImageCaptchaConfig image = new ImageCaptchaConfig();
 
     @NestedConfigurationProperty @Valid private SlideCaptchaConfig slide = new SlideCaptchaConfig();
-
-    @NestedConfigurationProperty @Valid private SmsCaptchaConfig sms = new SmsCaptchaConfig();
   }
 
   /** 图片验证码 */
@@ -202,10 +187,6 @@ public class WbProperties {
     /** 混乱度 */
     @Min(1)
     private int chaos = 10;
-
-    /** 验证码有效时间（秒），0 则不限制 */
-    @Min(0)
-    private long ttl = 300L;
   }
 
   /** 滑块验证码 */
@@ -242,28 +223,13 @@ public class WbProperties {
     private String contentFile = "slide.txt";
   }
 
-  /** 短信验证码 */
-  @Data
-  @Validated
-  public static class SmsCaptchaConfig {
-    /** 是否启用 */
-    private boolean enabled = false;
-
-    /** 验证码长度 */
-    @Min(1)
-    private int length = 6;
-
-    /** 验证码键 */
-    private String codeKey = "code";
-  }
-
   @Data
   @Validated
   public static class CryptoConfig {
     /** 是否启用 */
     private boolean enabled = false;
 
-    /** 加密模式 参考 CryptoMode */
+    /** 加密模式：aes_rsa，aes_sm2，rsa，sm2 */
     private String mode = "";
 
     /** 公钥 */
@@ -271,81 +237,6 @@ public class WbProperties {
 
     /** 私钥 */
     private String privateKey = "";
-  }
-
-  @Data
-  @Validated
-  public static class OssConfig {
-    /** 是否启用 */
-    private boolean enabled = false;
-
-    /** 实现类 */
-    private String type = "";
-
-    /** 服务地址 */
-    private String endpoint = "";
-
-    /** AccessKey */
-    private String accessKey = "";
-
-    /** AccessSecret */
-    private String secretKey = "";
-
-    /** 默认存储桶 */
-    private String defaultBucket = "";
-
-    /** 链接签名有效期（秒） */
-    private long signedUrlTtl = 3600L;
-
-    /** 对外下载域名，默认同 endpoint，对 presigned url 无效 */
-    private String domain = "";
-  }
-
-  @Data
-  @Validated
-  public static class SmsConfig {
-    /** 是否启用 */
-    private boolean enabled = false;
-
-    /** 实现类 */
-    private String type = "";
-
-    /** 账户 */
-    private String accessKey = "";
-
-    /** 密钥 */
-    private String accessSecret = "";
-
-    /** SP 服务号 */
-    private String extno = "";
-
-    /** 接入点 */
-    private String endpoint = "";
-
-    /** 短信过滤器配置 */
-    @NestedConfigurationProperty @Valid private SmsFilterConfig smsFilter = new SmsFilterConfig();
-  }
-
-  @Data
-  @Validated
-  public static class SmsFilterConfig {
-    /** 单个手机号限制间隔发送时间（秒） 0 则不限制 */
-    @Min(0)
-    private long singleRateLimit = 60L;
-
-    /** 整体限制，需要两者结合使用，需要 Redis period 设置检查周期，例如 60s 或 60m，单位支持 s（秒）和 m（分钟） 限制检查周期中最大的发送数量 */
-    private String totalRateLimitPeriod = "60s";
-
-    @Min(0)
-    private long totalRateLimit = 60L;
-  }
-
-  @Data
-  public static class LicenseConfig {
-    /** 模式 */
-    private String mode = "";
-    /** 授权对象 */
-    private String subject = "";
   }
 
   @Data

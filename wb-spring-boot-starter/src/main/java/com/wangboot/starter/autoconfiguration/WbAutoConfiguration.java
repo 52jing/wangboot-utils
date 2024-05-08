@@ -1,6 +1,7 @@
 package com.wangboot.starter.autoconfiguration;
 
 import cn.hutool.captcha.generator.CodeGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wangboot.core.auth.authentication.IAuthenticator;
 import com.wangboot.core.auth.authentication.authenticator.TokenAuthenticator;
 import com.wangboot.core.auth.authorization.IAuthorizerService;
@@ -16,6 +17,7 @@ import com.wangboot.core.captcha.image.ImageCaptchaConfig;
 import com.wangboot.core.captcha.image.ImageCaptchaProcessor;
 import com.wangboot.core.captcha.repository.CacheCaptchaRepository;
 import com.wangboot.core.captcha.repository.MapCaptchaRepository;
+import com.wangboot.core.crypto.CryptoProcessor;
 import com.wangboot.core.reliability.blacklist.CacheBlacklistHolder;
 import com.wangboot.core.reliability.blacklist.IBlacklistHolder;
 import com.wangboot.core.utils.password.PasswordStrategyManager;
@@ -99,27 +101,20 @@ public class WbAutoConfiguration {
     return new LoginRestriction();
   }
 
-  /** 登录计数器 */
-  //  @Bean
-  //  @ConditionalOnMissingBean(ICountLimit.class)
-  //  public ICountLimit loginLimit() {
-  //    return new CacheCountLimit(
-  //      config.getAuthConfig().getLoginFailedThreshold(),
-  //      config.getAuthConfig().getLoginFailedCheckSeconds());
-  //  }
+  /** 加解密处理器 */
+  @Bean
+  public CryptoProcessor cryptoProcessor(ObjectMapper objectMapper) {
+    if (wbProperties.getCrypto().isEnabled()) {
+      return new CryptoProcessor(
+          objectMapper,
+          this.wbProperties.getCrypto().getPrivateKey().replace("\n", ""),
+          this.wbProperties.getCrypto().getPublicKey().replace("\n", ""));
+    } else {
+      return null;
+    }
+  }
 
-  /** 加密处理器 */
-  //  @Bean
-  //  public CryptoProcessor cryptoProcessor(ObjectMapper objectMapper) {
-  //    if (config.isApiCryptoEnabled()) {
-  //      return new CryptoProcessor(
-  //        objectMapper,
-  //        config.getCryptoConfig().getPrivateKey().replace("\n", ""),
-  //        config.getCryptoConfig().getPublicKey().replace("\n", ""));
-  //    }
-  //    return null;
-  //  }
-
+  /** 验证码存储器 */
   @Bean
   @ConditionalOnMissingBean(ICaptchaRepository.class)
   public ICaptchaRepository captchaRepository() {
@@ -132,6 +127,7 @@ public class WbAutoConfiguration {
     }
   }
 
+  /** 图片验证码处理器 */
   @Bean
   public ICaptchaProcessor imageCaptchaProcessor(ICaptchaRepository captchaRepository) {
     if (wbProperties.getCaptcha().getImage().isEnabled()) {
