@@ -148,6 +148,7 @@ public class UtilsTest {
     // splitStrList
     Assertions.assertEquals(ls, StrUtils.splitStrList(s, del));
     Assertions.assertEquals(0, StrUtils.splitStrList("", del).size());
+    Assertions.assertEquals("", StrUtils.joinList(null, del));
     // splitLongList
     s = "1,2,3";
     List<Long> ll = StrUtils.splitLongList(s, del);
@@ -186,12 +187,14 @@ public class UtilsTest {
     // getFloat
     Assertions.assertEquals(1.2f, StrUtils.getFloat("1.2"));
     Assertions.assertEquals(0.5f, StrUtils.getFloat(null, 0.5f));
+    Assertions.assertNull(StrUtils.getFloat(null));
     // getFloatPrimitive
     Assertions.assertEquals(1.5f, StrUtils.getFloatPrimitive("1.5", 0.8f));
     Assertions.assertEquals(0.8f, StrUtils.getFloatPrimitive("", 0.8f));
     // getBoolean
     Assertions.assertEquals(true, StrUtils.getBoolean("true"));
     Assertions.assertEquals(false, StrUtils.getBoolean(null, false));
+    Assertions.assertNull(StrUtils.getBoolean(null));
     // getBooleanPrimitive
     Assertions.assertTrue(StrUtils.getBooleanPrimitive("true", false));
     Assertions.assertFalse(StrUtils.getBooleanPrimitive("", false));

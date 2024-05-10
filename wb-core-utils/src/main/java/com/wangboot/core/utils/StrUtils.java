@@ -171,7 +171,7 @@ public class StrUtils {
 
   public static Long getLong(String value, Long defaultVal) {
     if (Objects.isNull(value)) {
-      return null;
+      return defaultVal;
     }
     return Convert.toLong(value, defaultVal);
   }
@@ -187,7 +187,7 @@ public class StrUtils {
 
   public static Float getFloat(String value, Float defaultVal) {
     if (Objects.isNull(value)) {
-      return null;
+      return defaultVal;
     }
     return Convert.toFloat(value, defaultVal);
   }
@@ -203,7 +203,7 @@ public class StrUtils {
 
   public static Boolean getBoolean(String value, Boolean defaultVal) {
     if (Objects.isNull(value)) {
-      return null;
+      return defaultVal;
     }
     return Convert.toBool(value, defaultVal);
   }

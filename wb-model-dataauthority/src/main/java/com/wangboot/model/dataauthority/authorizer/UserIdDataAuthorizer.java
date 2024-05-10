@@ -23,8 +23,9 @@ public class UserIdDataAuthorizer implements IDataAuthorizer {
     if (Objects.isNull(object)) {
       return false;
     }
+    String fd = this.getField().contains("_") ? StrUtils.toCamelCase(this.getField(), false) : this.getField();
     String val =
-        DynaBean.create(object).get(StrUtils.toCamelCase(this.getField(), false)).toString();
+        DynaBean.create(object).get(fd).toString();
     return StringUtils.hasText(this.userId) && this.userId.equals(val);
   }
 

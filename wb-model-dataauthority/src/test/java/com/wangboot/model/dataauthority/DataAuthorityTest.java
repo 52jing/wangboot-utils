@@ -1,5 +1,6 @@
 package com.wangboot.model.dataauthority;
 
+import com.wangboot.core.auth.authorization.resource.ApiResource;
 import com.wangboot.model.dataauthority.authorizer.*;
 import com.wangboot.model.dataauthority.datascope.IDataScopeService;
 import com.wangboot.model.dataauthority.datascope.SimpleDataScope;
@@ -11,6 +12,8 @@ import lombok.Data;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collections;
 
 @DisplayName("数据权限测试")
 public class DataAuthorityTest {
@@ -41,6 +44,9 @@ public class DataAuthorityTest {
     Assertions.assertEquals("field", dataAuthority.field());
     dataAuthority = DataAuthorityUtils.getDataAuthority(D2.class);
     Assertions.assertEquals("userId", dataAuthority.field());
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      DataAuthorityUtils.getDataAuthority(SimpleDataScope.class);
+    });
     // getDataAuthorizer
     IDataAuthorizer dataAuthorizer = DataAuthorityUtils.getDataAuthorizer(D1.class);
     Assertions.assertNotNull(dataAuthorizer);
@@ -52,92 +58,29 @@ public class DataAuthorityTest {
     Assertions.assertNull(dataAuthorizer);
   }
 
-  //  @Test
-  //  public void testDataAuthorizer() {
-  //    String userId = "123";
-  //    String auth = RandomUtil.randomString(6);
-  //    IUserModel userModel = MockUser.builder().id(userId).build();
-  //    D1 d1 = new D1();
-  //    // NoneDataAuthorizer
-  //    IDataAuthorizer dataAuthorizer = new NoneDataAuthorizer(true);
-  //    Assertions.assertTrue(dataAuthorizer.hasAllAuthorities());
-  //    Assertions.assertTrue(dataAuthorizer.authorize(d1));
-  //    Assertions.assertTrue(dataAuthorizer.authorizeAll(Collections.singletonList(d1)));
-  //    Assertions.assertEquals(0, dataAuthorizer.getAuthorities().size());
-  //    dataAuthorizer = new NoneDataAuthorizer(false);
-  //    Assertions.assertFalse(dataAuthorizer.hasAllAuthorities());
-  //    Assertions.assertFalse(dataAuthorizer.authorize(d1));
-  //    Assertions.assertFalse(dataAuthorizer.authorizeAll(Collections.singletonList(d1)));
-  //    Assertions.assertEquals(0, dataAuthorizer.getAuthorities().size());
-  //    // DataScopeAuthorizer
-  //    String dataScopeName = RandomUtil.randomString(8);
-  //    IDataScopeModel dataScopeModel = new SimpleDataScope(dataScopeName);
-  //    dataAuthorizer = new DataScopeAuthorizer(userModel,
-  // Collections.singletonList(dataScopeModel));
-  //    Assertions.assertFalse(dataAuthorizer.hasAllAuthorities());
-  //    Assertions.assertEquals(1, dataAuthorizer.getAuthorities().size());
-  //    Assertions.assertFalse(dataAuthorizer.authorize(null));
-  //    Assertions.assertTrue(dataAuthorizer.authorizeAll(Collections.emptyList()));
-  //    Assertions.assertFalse(dataAuthorizer.authorize(d1));
-  //    Assertions.assertFalse(dataAuthorizer.authorizeAll(Collections.singletonList(d1)));
-  //    D2 d2 = new D2();
-  //    IDataAuthorizer finalDataAuthorizer = dataAuthorizer;
-  //    Assertions.assertThrows(
-  //        IllegalArgumentException.class, () -> finalDataAuthorizer.authorize(d2));
-  //    Assertions.assertThrows(
-  //        IllegalArgumentException.class,
-  //        () -> finalDataAuthorizer.authorizeAll(Collections.singletonList(d2)));
-  //    D3 d3 = new D3(dataScopeName);
-  //    Assertions.assertTrue(dataAuthorizer.authorize(d3));
-  //    Assertions.assertTrue(dataAuthorizer.authorizeAll(Collections.singletonList(d3)));
-  //    d3 = new D3(RandomUtil.randomString(9));
-  //    Assertions.assertFalse(dataAuthorizer.authorize(d3));
-  //    Assertions.assertFalse(dataAuthorizer.authorizeAll(Collections.singletonList(d3)));
-  //
-  //    // CustomFieldDataAuthorizer
-  //    //    List<String> perms = new ArrayList<>();
-  //    //    perms.add(auth);
-  //    //    dataAuthorizer = new CustomFieldDataAuthorizer(perms, false);
-  //    //    Assertions.assertFalse(dataAuthorizer.hasAllAuthorities());
-  //    //    Assertions.assertEquals(1, dataAuthorizer.getAuthorities().size());
-  //    //    Assertions.assertFalse(dataAuthorizer.authorize(null));
-  //    //    Assertions.assertTrue(dataAuthorizer.authorizeAll(Collections.emptyList()));
-  //    //    Assertions.assertFalse(dataAuthorizer.authorize(d1));
-  //    //    Assertions.assertFalse(dataAuthorizer.authorizeAll(Collections.singletonList(d1)));
-  //    //    D5 d5 = new D5();
-  //    //    IDataAuthorizer finalDataAuthorizer1 = dataAuthorizer;
-  //    //    Assertions.assertThrows(IllegalArgumentException.class, () ->
-  //    // finalDataAuthorizer1.authorize(d5));
-  //    //    Assertions.assertThrows(IllegalArgumentException.class, () ->
-  //    // finalDataAuthorizer1.authorizeAll(Collections.singletonList(d5)));
-  //    //    D6 d6 = new D6(auth);
-  //    //    Assertions.assertTrue(dataAuthorizer.authorize(d6));
-  //    //    Assertions.assertTrue(dataAuthorizer.authorizeAll(Collections.singletonList(d6)));
-  //    //    d6 = new D6(RandomUtil.randomString(10));
-  //    //    Assertions.assertFalse(dataAuthorizer.authorize(d6));
-  //    //    Assertions.assertFalse(dataAuthorizer.authorizeAll(Collections.singletonList(d6)));
-  //    //    Assertions.assertTrue(dataAuthorizer.authorize(new Object()));
-  //    // UserIdFieldDataAuthorizer
-  //    dataAuthorizer = new UserIdFieldDataAuthorizer(userModel);
-  //    Assertions.assertFalse(dataAuthorizer.hasAllAuthorities());
-  //    Assertions.assertEquals(1, dataAuthorizer.getAuthorities().size());
-  //    Assertions.assertFalse(dataAuthorizer.authorize(null));
-  //    Assertions.assertTrue(dataAuthorizer.authorizeAll(Collections.emptyList()));
-  //    Assertions.assertFalse(dataAuthorizer.authorize(d1));
-  //    Assertions.assertFalse(dataAuthorizer.authorizeAll(Collections.singletonList(d1)));
-  //    D4 d4 = new D4();
-  //    IDataAuthorizer finalDataAuthorizer2 = dataAuthorizer;
-  //    Assertions.assertThrows(
-  //        IllegalArgumentException.class, () -> finalDataAuthorizer2.authorize(d4));
-  //    Assertions.assertThrows(
-  //        IllegalArgumentException.class,
-  //        () -> finalDataAuthorizer2.authorizeAll(Collections.singletonList(d4)));
-  //    D5 d5 = new D5(userId);
-  //    Assertions.assertTrue(dataAuthorizer.authorize(d5));
-  //    Assertions.assertTrue(dataAuthorizer.authorizeAll(Collections.singletonList(d5)));
-  //    d5 = new D5(RandomUtil.randomString(6));
-  //    Assertions.assertFalse(dataAuthorizer.authorize(d5));
-  //    Assertions.assertFalse(dataAuthorizer.authorizeAll(Collections.singletonList(d5)));
-  //    Assertions.assertTrue(dataAuthorizer.authorize(new Object()));
-  //  }
+  @Test
+  public void testDataAuthorizer() {
+    D1 d11 = new D1("g:n:a");
+    D1 d12 = new D1("p2");
+    D2 d21 = new D2("1");
+    D2 d22 = new D2("2");
+    // WholeDataAuthorizer
+    WholeDataAuthorizer authorizer1 = new WholeDataAuthorizer(true);
+    Assertions.assertTrue(authorizer1.hasDataAuthority(null));
+    Assertions.assertTrue(authorizer1.hasDataAuthority(d11));
+    Assertions.assertTrue(authorizer1.hasDataAuthorities(Collections.singleton(d11)));
+    Assertions.assertEquals("", authorizer1.getField());
+    // UserIdDataAuthorizer
+    UserIdDataAuthorizer authorizer2 = new UserIdDataAuthorizer("1", "userId");
+    Assertions.assertTrue(authorizer2.hasDataAuthority(d21));
+    Assertions.assertFalse(authorizer2.hasDataAuthority(d22));
+    Assertions.assertEquals(1, authorizer2.getAuthorities().size());
+    // DataScopeAuthorizer
+    DataScopeAuthorizer authorizer3 = new DataScopeAuthorizer("field", Collections.singletonList(new ApiResource("g", "n", "a")));
+    Assertions.assertFalse(authorizer3.hasDataAuthority(null));
+    Assertions.assertTrue(authorizer3.hasDataAuthority(d11));
+    Assertions.assertFalse(authorizer3.hasDataAuthority(d12));
+    Assertions.assertEquals(1, authorizer3.getAuthorities().size());
+  }
+
 }

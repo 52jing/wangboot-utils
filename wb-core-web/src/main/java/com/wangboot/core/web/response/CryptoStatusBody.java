@@ -3,6 +3,7 @@ package com.wangboot.core.web.response;
 import com.wangboot.core.crypto.CryptoBody;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Generated;
 import org.springframework.http.HttpStatus;
 
 /**
@@ -22,6 +23,7 @@ public class CryptoStatusBody implements IStatusBody {
 
   private int status = HttpStatus.OK.value();
 
+  @Generated
   public CryptoStatusBody(CryptoBody cryptoBody) {
     this.jsondata = cryptoBody.getJsondata();
     this.id = cryptoBody.getId();

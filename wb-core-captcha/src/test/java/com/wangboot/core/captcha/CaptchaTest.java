@@ -32,6 +32,7 @@ public class CaptchaTest {
     ImageCaptcha captcha1 = new ImageCaptcha(captcha.getUid(), captcha.getCode());
     Assertions.assertTrue(captcha.match(captcha1));
     Assertions.assertFalse(captcha.match(null));
+    Assertions.assertFalse(captcha.match(new ImageCaptcha(RandomUtil.randomString(4), "")));
     Assertions.assertThrows(
         InvalidUidException.class, () -> new ImageCaptcha("", captcha.getCode()));
     ImageCaptcha captcha2 = new ImageCaptcha(uid, RandomUtil.randomString(4));

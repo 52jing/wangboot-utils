@@ -14,6 +14,7 @@ public class ReliabilityTest {
   @SneakyThrows
   public void testCountLimit() {
     ICounter counter = new CacheCounter(1);
+    Assertions.assertEquals(0, counter.increment(""));
     String k1 = RandomUtil.randomString(6);
     Assertions.assertEquals(0, counter.getCount(k1));
     Assertions.assertEquals(1, counter.increment(k1));
