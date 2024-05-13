@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ImageCaptchaConfig {
   /** 验证码类型: circle, shear, gif, line */
-  private String type = "line";
+  @Builder.Default private String type = "line";
 
   /** 图片宽度 */
   @Builder.Default private int width = 200;

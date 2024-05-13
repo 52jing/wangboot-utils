@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Generated;
 import lombok.Getter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -42,6 +43,7 @@ public class ParamFilterDefinition {
     private FilterOperator operator = FilterOperator.EQ;
     private ParamValType type = ParamValType.STR;
 
+    @Generated
     public Definition(String field) {
       this.field = field;
     }

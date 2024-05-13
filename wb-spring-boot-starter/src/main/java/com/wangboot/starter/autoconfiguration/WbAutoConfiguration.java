@@ -1,6 +1,7 @@
 package com.wangboot.starter.autoconfiguration;
 
 import cn.hutool.captcha.generator.CodeGenerator;
+import cn.hutool.core.bean.BeanUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wangboot.core.auth.authentication.IAuthenticator;
 import com.wangboot.core.auth.authentication.authenticator.TokenAuthenticator;
@@ -131,12 +132,8 @@ public class WbAutoConfiguration {
   @Bean
   public ICaptchaProcessor imageCaptchaProcessor(ICaptchaRepository captchaRepository) {
     if (wbProperties.getCaptcha().getImage().isEnabled()) {
-      ImageCaptchaConfig config = new ImageCaptchaConfig();
-      config.setType(wbProperties.getCaptcha().getImage().getType());
-      config.setWidth(wbProperties.getCaptcha().getImage().getWidth());
-      config.setHeight(wbProperties.getCaptcha().getImage().getHeight());
-      config.setLength(wbProperties.getCaptcha().getImage().getLength());
-      config.setChaos(wbProperties.getCaptcha().getImage().getChaos());
+      ImageCaptchaConfig config =
+          BeanUtil.copyProperties(wbProperties.getCaptcha().getImage(), ImageCaptchaConfig.class);
       CodeGenerator codeGenerator = wbProperties.getComponents().getCaptchaCodeGenerator();
       ImageCaptchaProcessor processor =
           new ImageCaptchaProcessor(config, captchaRepository, codeGenerator);

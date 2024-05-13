@@ -3,6 +3,7 @@ package com.wangboot.model.entity.request;
 import java.io.Serializable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Generated;
 import lombok.experimental.Accessors;
 
 /**
@@ -19,6 +20,7 @@ public class FieldFilter implements Serializable {
   private FilterOperator operator = FilterOperator.EQ;
   private ParamValType type = ParamValType.STR;
 
+  @Generated
   public FieldFilter(String field, String val) {
     this.field = field;
     this.val = val;

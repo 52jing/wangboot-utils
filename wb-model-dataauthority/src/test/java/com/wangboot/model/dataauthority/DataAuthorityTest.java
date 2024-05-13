@@ -7,13 +7,12 @@ import com.wangboot.model.dataauthority.datascope.SimpleDataScope;
 import com.wangboot.model.dataauthority.factory.AllowAllAuthorizerFactory;
 import com.wangboot.model.dataauthority.factory.UserIdAuthorizerFactory;
 import com.wangboot.model.dataauthority.utils.DataAuthorityUtils;
+import java.util.Collections;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Collections;
 
 @DisplayName("数据权限测试")
 public class DataAuthorityTest {
@@ -44,9 +43,11 @@ public class DataAuthorityTest {
     Assertions.assertEquals("field", dataAuthority.field());
     dataAuthority = DataAuthorityUtils.getDataAuthority(D2.class);
     Assertions.assertEquals("userId", dataAuthority.field());
-    Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      DataAuthorityUtils.getDataAuthority(SimpleDataScope.class);
-    });
+    Assertions.assertThrows(
+        IllegalArgumentException.class,
+        () -> {
+          DataAuthorityUtils.getDataAuthority(SimpleDataScope.class);
+        });
     // getDataAuthorizer
     IDataAuthorizer dataAuthorizer = DataAuthorityUtils.getDataAuthorizer(D1.class);
     Assertions.assertNotNull(dataAuthorizer);
@@ -76,11 +77,11 @@ public class DataAuthorityTest {
     Assertions.assertFalse(authorizer2.hasDataAuthority(d22));
     Assertions.assertEquals(1, authorizer2.getAuthorities().size());
     // DataScopeAuthorizer
-    DataScopeAuthorizer authorizer3 = new DataScopeAuthorizer("field", Collections.singletonList(new ApiResource("g", "n", "a")));
+    DataScopeAuthorizer authorizer3 =
+        new DataScopeAuthorizer("field", Collections.singletonList(new ApiResource("g", "n", "a")));
     Assertions.assertFalse(authorizer3.hasDataAuthority(null));
     Assertions.assertTrue(authorizer3.hasDataAuthority(d11));
     Assertions.assertFalse(authorizer3.hasDataAuthority(d12));
     Assertions.assertEquals(1, authorizer3.getAuthorities().size());
   }
-
 }

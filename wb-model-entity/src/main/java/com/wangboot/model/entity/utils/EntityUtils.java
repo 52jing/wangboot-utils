@@ -142,40 +142,6 @@ public class EntityUtils {
     }
   }
 
-  /**
-   * 获取对象的识别码
-   *
-   * @param obj 对象
-   * @return 字符串
-   */
-  @NonNull
-  public static String getEntityIdentifierStr(@Nullable Object obj) {
-    if (Objects.isNull(obj)) {
-      return "";
-    }
-    if (obj instanceof IdEntity) {
-      return ((IdEntity<?>) obj).getId().toString();
-    } else {
-      return obj.toString();
-    }
-  }
-
-  /**
-   * 设置对象的识别码
-   *
-   * @param obj 对象
-   * @param id 识别码
-   */
-  @SuppressWarnings("unchecked")
-  public static void setEntityIdentifier(@Nullable Object obj, @Nullable Serializable id) {
-    if (Objects.isNull(obj) || Objects.isNull(id)) {
-      return;
-    }
-    if (obj instanceof IdEntity) {
-      ((IdEntity<Serializable>) obj).setId(id);
-    }
-  }
-
   /** 是否启用操作日志记录 */
   public static boolean isOperationLogEnabled(@NonNull Class<?> entityClass) {
     return entityClass.isAnnotationPresent(EnableOperationLog.class);
