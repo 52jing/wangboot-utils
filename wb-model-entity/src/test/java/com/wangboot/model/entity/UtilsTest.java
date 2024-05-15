@@ -9,12 +9,11 @@ import com.wangboot.core.web.response.MessageBody;
 import com.wangboot.model.entity.event.EnableOperationLog;
 import com.wangboot.model.entity.request.*;
 import com.wangboot.model.entity.utils.EntityUtils;
+import com.wangboot.model.entity.utils.RequestUtils;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.wangboot.model.entity.utils.RequestUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,8 +21,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
-
-import javax.servlet.http.HttpServletRequest;
 
 @DisplayName("Entity测试")
 public class UtilsTest {
@@ -195,7 +192,8 @@ public class UtilsTest {
     Assertions.assertFalse(EntityUtils.isOperationLogEnabled(ObjBody.class));
     // getOperationLogAnnotation
     Assertions.assertNotNull(EntityUtils.getOperationLogAnnotation(Obj1.class));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> EntityUtils.getOperationLogAnnotation(ObjBody.class));
+    Assertions.assertThrows(
+        IllegalArgumentException.class, () -> EntityUtils.getOperationLogAnnotation(ObjBody.class));
   }
 
   @Test
@@ -226,7 +224,7 @@ public class UtilsTest {
     Assertions.assertEquals(field2, sortFilters3[1].getField());
     Assertions.assertFalse(sortFilters3[1].isAsc());
     // with default
-    SortFilter[] defaultSorts = new SortFilter[]{new SortFilter(field1)};
+    SortFilter[] defaultSorts = new SortFilter[] {new SortFilter(field1)};
     sort = field2;
     SortFilter[] sortFilters4 = RequestUtils.buildSortFilter(sort, defaultSorts, null);
     Assertions.assertNotNull(sortFilters4);
@@ -240,7 +238,7 @@ public class UtilsTest {
     Assertions.assertTrue(sortFilters5[0].isAsc());
     // with sortable fields
     sort = "field2-";
-    String[] sortableFields = new String[]{field1};
+    String[] sortableFields = new String[] {field1};
     SortFilter[] sortFilters6 = RequestUtils.buildSortFilter(sort, defaultSorts, sortableFields);
     Assertions.assertNotNull(sortFilters6);
     Assertions.assertEquals(0, sortFilters6.length);
@@ -281,10 +279,11 @@ public class UtilsTest {
     Assertions.assertEquals(1, filters3.length);
     Assertions.assertEquals(field1, filters3[0].getField());
     // add gt definition
-    ParamFilterDefinition definition2 = ParamFilterDefinition.newInstance()
-      .addFilter(field1, new ParamFilterDefinition.Definition(field1, FilterOperator.GT, ParamValType.INT))
-      .addFilter(field2)
-      .addFilter("");
+    ParamFilterDefinition definition2 =
+        ParamFilterDefinition.newInstance()
+            .addFilter(field1, new FieldFilter(field1, "", FilterOperator.GT, ParamValType.INT))
+            .addFilter(field2)
+            .addFilter("");
     params.clear();
     params.put(field1, "1");
     params.put(field2, "a");
@@ -302,24 +301,28 @@ public class UtilsTest {
     String field1 = "field1";
     String field2 = "field2";
     // search fields
-    String[] searchFields1 = new String[]{field1, field2};
-    FieldFilter[] filters1 = RequestUtils.buildSearchFilter(query, searchFields1, SearchStrategy.LEFT_LIKE);
+    String[] searchFields1 = new String[] {field1, field2};
+    FieldFilter[] filters1 =
+        RequestUtils.buildSearchFilter(query, searchFields1, SearchStrategy.LEFT_LIKE);
     Assertions.assertEquals(2, filters1.length);
     Assertions.assertEquals(field1, filters1[0].getField());
     Assertions.assertEquals(FilterOperator.STARTSWITH, filters1[0].getOperator());
     Assertions.assertEquals(field2, filters1[1].getField());
     Assertions.assertEquals(FilterOperator.STARTSWITH, filters1[1].getOperator());
     // no searchable fields
-    String[] searchFields2 = new String[]{};
-    FieldFilter[] filters2 = RequestUtils.buildSearchFilter(query, searchFields2, SearchStrategy.LEFT_LIKE);
+    String[] searchFields2 = new String[] {};
+    FieldFilter[] filters2 =
+        RequestUtils.buildSearchFilter(query, searchFields2, SearchStrategy.LEFT_LIKE);
     Assertions.assertEquals(0, filters2.length);
     // other strategy
-    String[] searchFields3 = new String[]{field1};
-    FieldFilter[] filters3 = RequestUtils.buildSearchFilter(query, searchFields3, SearchStrategy.RIGHT_LIKE);
+    String[] searchFields3 = new String[] {field1};
+    FieldFilter[] filters3 =
+        RequestUtils.buildSearchFilter(query, searchFields3, SearchStrategy.RIGHT_LIKE);
     Assertions.assertEquals(1, filters3.length);
     Assertions.assertEquals(field1, filters3[0].getField());
     Assertions.assertEquals(FilterOperator.ENDSWITH, filters3[0].getOperator());
-    FieldFilter[] filters4 = RequestUtils.buildSearchFilter(query, searchFields3, SearchStrategy.BOTH_LIKE);
+    FieldFilter[] filters4 =
+        RequestUtils.buildSearchFilter(query, searchFields3, SearchStrategy.BOTH_LIKE);
     Assertions.assertEquals(1, filters4.length);
     Assertions.assertEquals(field1, filters4[0].getField());
     Assertions.assertEquals(FilterOperator.CONTAINS, filters4[0].getOperator());
@@ -348,13 +351,16 @@ public class UtilsTest {
     String s2 = RequestUtils.getSortParam(request);
     Assertions.assertEquals(sort, s2);
     // getPageParam
-    Assertions.assertEquals(RequestConstants.REQUEST_PARAM_PAGE_DEFAULT, RequestUtils.getPageParam(request));
+    Assertions.assertEquals(
+        RequestConstants.REQUEST_PARAM_PAGE_DEFAULT, RequestUtils.getPageParam(request));
     long page = RandomUtil.randomInt(1, 100);
     request.setParameter(RequestConstants.REQUEST_PARAM_PAGE, String.valueOf(page));
     long s3 = RequestUtils.getPageParam(request);
     Assertions.assertEquals(page, s3);
     // getPageSizeParam
-    Assertions.assertEquals(RequestConstants.REQUEST_PARAM_PAGE_SIZE_DEFAULT, RequestUtils.getPageSizeParam(request, 100L));
+    Assertions.assertEquals(
+        RequestConstants.REQUEST_PARAM_PAGE_SIZE_DEFAULT,
+        RequestUtils.getPageSizeParam(request, 100L));
     long pageSize = RandomUtil.randomInt(1, 1000);
     request.setParameter(RequestConstants.REQUEST_PARAM_PAGE_SIZE, String.valueOf(pageSize));
     long s4 = RequestUtils.getPageSizeParam(request, 10000L);

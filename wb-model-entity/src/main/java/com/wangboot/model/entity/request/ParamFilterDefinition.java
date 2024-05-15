@@ -2,9 +2,6 @@ package com.wangboot.model.entity.request;
 
 import java.util.HashMap;
 import java.util.Map;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Generated;
 import lombok.Getter;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -16,13 +13,13 @@ import org.springframework.lang.Nullable;
  */
 public class ParamFilterDefinition {
 
-  @Getter private final Map<String, Definition> params;
+  @Getter private final Map<String, FieldFilter> params;
 
   public ParamFilterDefinition() {
     params = new HashMap<>();
   }
 
-  public ParamFilterDefinition addFilter(String param, @Nullable Definition definition) {
+  public ParamFilterDefinition addFilter(String param, @Nullable FieldFilter definition) {
     this.params.put(param, definition);
     return this;
   }
@@ -34,18 +31,5 @@ public class ParamFilterDefinition {
   @NonNull
   public static ParamFilterDefinition newInstance() {
     return new ParamFilterDefinition();
-  }
-
-  @Data
-  @AllArgsConstructor
-  public static class Definition {
-    private String field;
-    private FilterOperator operator = FilterOperator.EQ;
-    private ParamValType type = ParamValType.STR;
-
-    @Generated
-    public Definition(String field) {
-      this.field = field;
-    }
   }
 }

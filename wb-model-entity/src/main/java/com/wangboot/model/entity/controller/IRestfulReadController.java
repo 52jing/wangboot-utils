@@ -3,7 +3,6 @@ package com.wangboot.model.entity.controller;
 import com.wangboot.core.web.response.DetailBody;
 import com.wangboot.core.web.response.ListBody;
 import com.wangboot.core.web.utils.ResponseUtils;
-import com.wangboot.core.web.utils.ServletUtils;
 import com.wangboot.model.entity.IRestfulService;
 import com.wangboot.model.entity.IdEntity;
 import com.wangboot.model.entity.exception.NotFoundException;
@@ -17,7 +16,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -34,18 +32,13 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
   @NonNull
   IRestfulService<I, T> getReadService();
 
-  @Nullable
-  default HttpServletRequest getRequest() {
-    return ServletUtils.getRequest();
-  }
-
   /**
    * 获取排序参数
    *
    * @return 排序参数
    */
   default String getSort() {
-    return RequestUtils.getSortParam(getRequest());
+    return RequestUtils.getSortParam(null);
   }
 
   /**
@@ -55,7 +48,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 可排序字段数组
    */
   @Nullable
-  default String[] getSortableFields() {
+  default String[] configSortableFields() {
     return new String[0];
   }
 
@@ -66,7 +59,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 默认排序数组
    */
   @Nullable
-  default SortFilter[] getDefaultSort() {
+  default SortFilter[] configDefaultSort() {
     return new SortFilter[0];
   }
 
@@ -77,7 +70,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    */
   @Nullable
   default SortFilter[] parseSortFilters() {
-    return RequestUtils.buildSortFilter(getSort(), getDefaultSort(), getSortableFields());
+    return RequestUtils.buildSortFilter(getSort(), configDefaultSort(), configSortableFields());
   }
 
   /**
@@ -86,7 +79,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 搜索参数
    */
   default String getQuery() {
-    return RequestUtils.getSearchParam(getRequest());
+    return RequestUtils.getSearchParam(null);
   }
 
   /**
@@ -96,7 +89,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 可搜索字段数组
    */
   @Nullable
-  default String[] getSearchableFields() {
+  default String[] configSearchableFields() {
     return new String[0];
   }
 
@@ -107,7 +100,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 搜索匹配策略
    */
   @NonNull
-  default SearchStrategy getSearchStrategy() {
+  default SearchStrategy configSearchStrategy() {
     return SearchStrategy.LEFT_LIKE;
   }
 
@@ -117,7 +110,8 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 搜索过滤器数组
    */
   default FieldFilter[] parseSearchFilters() {
-    return RequestUtils.buildSearchFilter(getQuery(), getSearchableFields(), getSearchStrategy());
+    return RequestUtils.buildSearchFilter(
+        getQuery(), configSearchableFields(), configSearchStrategy());
   }
 
   /**
@@ -127,7 +121,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 筛选规则
    */
   @Nullable
-  default ParamFilterDefinition getParamFilterDefinition() {
+  default ParamFilterDefinition configParamFilterDefinition() {
     return null;
   }
 
@@ -138,7 +132,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    */
   @Nullable
   default Map<String, String> getFilterParameters() {
-    return RequestUtils.getParametersMap(getRequest());
+    return RequestUtils.getParametersMap(null);
   }
 
   /**
@@ -147,7 +141,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 筛选参数过滤器
    */
   default FieldFilter[] parseParamFilters() {
-    return RequestUtils.buildParamFieldFilter(getParamFilterDefinition(), getFilterParameters());
+    return RequestUtils.buildParamFieldFilter(configParamFilterDefinition(), getFilterParameters());
   }
 
   /**
@@ -167,7 +161,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 页码
    */
   default long getPage() {
-    return RequestUtils.getPageParam(getRequest());
+    return RequestUtils.getPageParam(null);
   }
 
   /**
@@ -176,7 +170,7 @@ public interface IRestfulReadController<I extends Serializable, T extends IdEnti
    * @return 每页数量
    */
   default long getPageSize() {
-    return RequestUtils.getPageSizeParam(getRequest(), getMaxPageSize());
+    return RequestUtils.getPageSizeParam(null, getMaxPageSize());
   }
 
   /**

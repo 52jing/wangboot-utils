@@ -7,6 +7,7 @@ import com.wangboot.model.dataauthority.datascope.SimpleDataScope;
 import com.wangboot.model.dataauthority.factory.AllowAllAuthorizerFactory;
 import com.wangboot.model.dataauthority.factory.UserIdAuthorizerFactory;
 import com.wangboot.model.dataauthority.utils.DataAuthorityUtils;
+import java.util.Arrays;
 import java.util.Collections;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -71,17 +72,25 @@ public class DataAuthorityTest {
     Assertions.assertTrue(authorizer1.hasDataAuthority(d11));
     Assertions.assertTrue(authorizer1.hasDataAuthorities(Collections.singleton(d11)));
     Assertions.assertEquals("", authorizer1.getField());
+    Assertions.assertEquals(0, authorizer1.getAuthorities().size());
     // UserIdDataAuthorizer
     UserIdDataAuthorizer authorizer2 = new UserIdDataAuthorizer("1", "userId");
+    Assertions.assertFalse(authorizer2.hasDataAuthority(null));
+    Assertions.assertFalse(authorizer2.hasDataAuthorities(null));
     Assertions.assertTrue(authorizer2.hasDataAuthority(d21));
+    Assertions.assertTrue(authorizer2.hasDataAuthorities(Collections.singleton(d21)));
     Assertions.assertFalse(authorizer2.hasDataAuthority(d22));
+    Assertions.assertFalse(authorizer2.hasDataAuthorities(Arrays.asList(d21, d22)));
     Assertions.assertEquals(1, authorizer2.getAuthorities().size());
     // DataScopeAuthorizer
     DataScopeAuthorizer authorizer3 =
         new DataScopeAuthorizer("field", Collections.singletonList(new ApiResource("g", "n", "a")));
     Assertions.assertFalse(authorizer3.hasDataAuthority(null));
+    Assertions.assertFalse(authorizer3.hasDataAuthorities(null));
     Assertions.assertTrue(authorizer3.hasDataAuthority(d11));
+    Assertions.assertTrue(authorizer3.hasDataAuthorities(Collections.singleton(d11)));
     Assertions.assertFalse(authorizer3.hasDataAuthority(d12));
+    Assertions.assertFalse(authorizer3.hasDataAuthorities(Arrays.asList(d11, d12)));
     Assertions.assertEquals(1, authorizer3.getAuthorities().size());
   }
 }

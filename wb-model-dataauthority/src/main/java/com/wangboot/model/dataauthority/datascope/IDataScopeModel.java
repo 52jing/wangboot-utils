@@ -12,6 +12,7 @@ public interface IDataScopeModel extends IAuthorizationResource {
   /** 获取数据权限名称 */
   String getDataScopeName();
 
+  /** 获取数据权限名称 */
   @Override
   default String getResourceName() {
     return this.getDataScopeName();

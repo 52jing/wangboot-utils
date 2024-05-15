@@ -9,5 +9,6 @@ import java.io.Serializable;
  */
 public interface IAuthorizationResource extends Serializable {
 
+  /** 获取资源名称 */
   String getResourceName();
 }

@@ -1,13 +1,12 @@
 package com.wangboot.model.entity;
 
-import com.wangboot.core.auth.utils.AuthUtils;
 import com.wangboot.core.web.response.ListBody;
-import com.wangboot.core.web.utils.ServletUtils;
 import com.wangboot.model.dataauthority.authorizer.IDataAuthorizer;
 import com.wangboot.model.dataauthority.utils.DataAuthorityUtils;
-import com.wangboot.model.entity.event.IOperationEventPublisher;
-import com.wangboot.model.entity.event.OperationEventType;
+import com.wangboot.model.entity.exception.DeleteFailedException;
 import com.wangboot.model.entity.exception.DuplicatedException;
+import com.wangboot.model.entity.exception.NotFoundException;
+import com.wangboot.model.entity.exception.UpdateFailedException;
 import com.wangboot.model.entity.request.FieldFilter;
 import com.wangboot.model.entity.request.SortFilter;
 import com.wangboot.model.entity.utils.EntityUtils;
@@ -17,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import javax.servlet.http.HttpServletRequest;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
@@ -28,29 +26,7 @@ import org.springframework.lang.Nullable;
  * @param <T> 实体类型
  * @author wwtg99
  */
-public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
-    extends IOperationEventPublisher {
-
-  /**
-   * 获取当前用户ID
-   *
-   * @return 用户ID
-   */
-  @Override
-  default String getUserId() {
-    return AuthUtils.getUserId();
-  }
-
-  /**
-   * 获取请求
-   *
-   * @return 请求
-   */
-  @Override
-  @Nullable
-  default HttpServletRequest getRequest() {
-    return ServletUtils.getRequest();
-  }
+public interface IRestfulService<I extends Serializable, T extends IdEntity<I>> {
 
   /**
    * 获取实体类型
@@ -89,6 +65,7 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
     if (Objects.isNull(id)) {
       return null;
     }
+    // 获取数据
     T data = getDataById(id);
     IDataAuthorizer dataAuthorizer = getDataAuthorizer();
     if (Objects.nonNull(dataAuthorizer)) {
@@ -124,6 +101,7 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
     if (Objects.isNull(ids)) {
       return Collections.emptyList();
     }
+    // 获取数据
     List<T> data = getDataByIds(ids);
     IDataAuthorizer dataAuthorizer = getDataAuthorizer();
     if (Objects.nonNull(dataAuthorizer)) {
@@ -269,11 +247,8 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entity 实体对象
    * @return 检查后的实体对象
    */
-  @Nullable
-  default T checkBeforeCreateObject(@Nullable T entity) {
-    if (Objects.isNull(entity)) {
-      return null;
-    }
+  @NonNull
+  default T checkBeforeCreateObject(@NonNull T entity) {
     // 检查是否重复
     if (isUniqueDuplicated(entity, true)) {
       throw new DuplicatedException();
@@ -287,24 +262,11 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entity 实体对象
    * @return boolean
    */
-  default boolean createResource(@Nullable T entity) {
+  default boolean createResource(@NonNull T entity) {
     // 创建前检查
     T t = checkBeforeCreateObject(entity);
-    if (Objects.isNull(t)) {
-      return false;
-    }
-    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布创建前操作事件
-      this.publishOperationEvent(getEntityClass(), OperationEventType.BEFORE_CREATE_EVENT, t);
-    }
     // 执行创建
-    boolean ret = saveData(t);
-    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布创建操作事件
-      this.publishOperationEvent(
-          getEntityClass(), OperationEventType.CREATED_EVENT, t.getId().toString(), t);
-    }
-    return ret;
+    return saveData(t);
   }
 
   /**
@@ -321,11 +283,8 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entities 数据集合
    * @return 检查后的数据集合
    */
-  @Nullable
-  default Collection<T> checkBeforeBatchCreateObjects(@Nullable Collection<T> entities) {
-    if (Objects.isNull(entities)) {
-      return null;
-    }
+  @NonNull
+  default Collection<T> checkBeforeBatchCreateObjects(@NonNull Collection<T> entities) {
     // 检查是否重复
     entities.forEach(
         d -> {
@@ -342,29 +301,11 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entities 实体对象集合
    * @return boolean
    */
-  default boolean batchCreateResources(@Nullable Collection<T> entities) {
+  default boolean batchCreateResources(@NonNull Collection<T> entities) {
     // 创建前检查
     Collection<T> ts = checkBeforeBatchCreateObjects(entities);
-    if (Objects.isNull(ts)) {
-      return false;
-    }
-    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布创建前操作事件
-      ts.forEach(
-          t ->
-              this.publishOperationEvent(
-                  getEntityClass(), OperationEventType.BEFORE_CREATE_EVENT, t));
-    }
     // 执行创建
-    boolean ret = batchSaveData(ts);
-    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布创建操作事件
-      ts.forEach(
-          t ->
-              this.publishOperationEvent(
-                  getEntityClass(), OperationEventType.CREATED_EVENT, t.getId().toString(), t));
-    }
-    return ret;
+    return batchSaveData(ts);
   }
 
   /**
@@ -381,27 +322,24 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entity 实体对象
    * @return 检查后的实体对象
    */
-  @Nullable
-  default T checkBeforeUpdateObject(@Nullable T entity) {
-    if (Objects.isNull(entity)) {
-      return null;
-    }
+  @NonNull
+  default T checkBeforeUpdateObject(@NonNull T entity) {
     IDataAuthorizer dataAuthorizer = getDataAuthorizer();
     if (Objects.nonNull(dataAuthorizer)) {
       // 限制数据权限
       // 根据 ID 获取原数据
       T original = viewResource(entity.getId());
       if (Objects.isNull(original)) {
-        return null;
+        throw new NotFoundException();
       }
       // 检查数据权限
       if (!dataAuthorizer.hasDataAuthority(original)) {
-        return null;
+        throw new UpdateFailedException(entity.getId());
       }
     }
     if (isReadOnly(entity)) {
       // 只读
-      return null;
+      throw new UpdateFailedException(entity.getId());
     }
     // 检查是否重复
     if (isUniqueDuplicated(entity, false)) {
@@ -416,25 +354,11 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entity 实体对象
    * @return boolean
    */
-  default boolean updateResource(@Nullable T entity) {
+  default boolean updateResource(@NonNull T entity) {
     // 更新前检查
     T t = checkBeforeUpdateObject(entity);
-    if (Objects.isNull(t)) {
-      return false;
-    }
-    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布更新前操作事件
-      this.publishOperationEvent(
-          getEntityClass(), OperationEventType.BEFORE_UPDATE_EVENT, t.getId().toString(), t);
-    }
     // 执行更新
-    boolean ret = updateData(t);
-    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布更新操作事件
-      this.publishOperationEvent(
-          getEntityClass(), OperationEventType.UPDATED_EVENT, t.getId().toString(), t);
-    }
-    return ret;
+    return updateData(t);
   }
 
   /**
@@ -451,21 +375,18 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entity 实体对象
    * @return 检查后的实体对象
    */
-  @Nullable
-  default T checkBeforeDeleteObject(@Nullable T entity) {
-    if (Objects.isNull(entity)) {
-      return null;
-    }
+  @NonNull
+  default T checkBeforeDeleteObject(@NonNull T entity) {
     IDataAuthorizer dataAuthorizer = getDataAuthorizer();
     if (Objects.nonNull(dataAuthorizer)) {
       // 限制数据权限
       if (!dataAuthorizer.hasDataAuthority(entity)) {
-        return null;
+        throw new DeleteFailedException(entity.getId());
       }
     }
     if (isReadOnly(entity)) {
       // 只读
-      return null;
+      throw new DeleteFailedException(entity.getId());
     }
     return entity;
   }
@@ -476,25 +397,11 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entity 实体对象
    * @return boolean
    */
-  default boolean deleteResource(@Nullable T entity) {
+  default boolean deleteResource(@NonNull T entity) {
     // 删除前检查
     T t = checkBeforeDeleteObject(entity);
-    if (Objects.isNull(t)) {
-      return false;
-    }
-    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布删除前操作事件
-      this.publishOperationEvent(
-          getEntityClass(), OperationEventType.BEFORE_DELETE_EVENT, t.getId().toString(), t);
-    }
     // 执行删除
-    boolean ret = deleteData(t);
-    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布删除操作事件
-      this.publishOperationEvent(
-          getEntityClass(), OperationEventType.DELETED_EVENT, t.getId().toString(), t);
-    }
-    return ret;
+    return deleteData(t);
   }
 
   /**
@@ -511,20 +418,26 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entities 数据集合
    * @return 检查后的数据集合
    */
-  @Nullable
-  default Collection<T> checkBeforeBatchDeleteObjects(@Nullable Collection<T> entities) {
-    if (Objects.isNull(entities) || entities.isEmpty()) {
-      return null;
+  @NonNull
+  default Collection<T> checkBeforeBatchDeleteObjects(@NonNull Collection<T> entities) {
+    if (entities.isEmpty()) {
+      return entities;
     }
     // 获取数据，如果缺少则有数据没有数据权限
     List<T> viewEntities =
         viewResources(entities.stream().map(IdEntity::getId).collect(Collectors.toSet()));
     if (viewEntities.size() != entities.size()) {
-      return null;
+      throw new DeleteFailedException(
+          entities.stream()
+              .map(d -> d.getId().toString())
+              .collect(Collectors.joining(FieldConstants.FIELD_SEP)));
     }
     // 判断只读
     if (isAnyReadOnly(viewEntities)) {
-      return null;
+      throw new DeleteFailedException(
+          entities.stream()
+              .map(d -> d.getId().toString())
+              .collect(Collectors.joining(FieldConstants.FIELD_SEP)));
     }
     return entities;
   }
@@ -535,31 +448,10 @@ public interface IRestfulService<I extends Serializable, T extends IdEntity<I>>
    * @param entities 实体集合
    * @return boolean
    */
-  default boolean batchDeleteResources(@Nullable Collection<T> entities) {
+  default boolean batchDeleteResources(@NonNull Collection<T> entities) {
     // 删除前检查
     Collection<T> ts = checkBeforeBatchDeleteObjects(entities);
-    if (Objects.isNull(ts)) {
-      return false;
-    }
-    if (EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布删除前操作事件
-      ts.forEach(
-          t ->
-              this.publishOperationEvent(
-                  getEntityClass(),
-                  OperationEventType.BEFORE_DELETE_EVENT,
-                  t.getId().toString(),
-                  t));
-    }
     // 执行删除
-    boolean ret = batchDeleteData(ts);
-    if (ret && EntityUtils.isOperationLogEnabled(getEntityClass())) {
-      // 发布删除操作事件
-      ts.forEach(
-          t ->
-              this.publishOperationEvent(
-                  getEntityClass(), OperationEventType.DELETED_EVENT, t.getId().toString(), t));
-    }
-    return ret;
+    return batchDeleteData(ts);
   }
 }

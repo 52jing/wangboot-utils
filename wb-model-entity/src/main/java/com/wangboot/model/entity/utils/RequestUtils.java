@@ -82,8 +82,7 @@ public class RequestUtils {
     if (Objects.nonNull(paramFilterDefinition)
         && !paramFilterDefinition.getParams().isEmpty()
         && Objects.nonNull(parameters)) {
-      for (Map.Entry<String, ParamFilterDefinition.Definition> entry :
-          paramFilterDefinition.getParams().entrySet()) {
+      for (Map.Entry<String, FieldFilter> entry : paramFilterDefinition.getParams().entrySet()) {
         // 跳过空参数
         if (!StringUtils.hasText(entry.getKey())) {
           continue;

@@ -9,6 +9,9 @@ public class FieldConstants {
 
   private FieldConstants() {}
 
+  /** 分隔符 */
+  public static final String FIELD_SEP = ",";
+
   /** 主键字段 */
   public static final String PRIMARY_KEY = "id";
 

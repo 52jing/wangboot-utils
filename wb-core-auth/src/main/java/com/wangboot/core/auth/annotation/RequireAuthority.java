@@ -1,9 +1,6 @@
 package com.wangboot.core.auth.annotation;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * 需求权限
@@ -12,6 +9,8 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
+@Inherited
+@Documented
 public @interface RequireAuthority {
   String[] value();
 

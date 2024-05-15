@@ -9,7 +9,10 @@ import lombok.Generated;
  */
 @Generated
 public enum SearchStrategy {
+  // str%
   LEFT_LIKE,
+  // %str
   RIGHT_LIKE,
+  // %str%
   BOTH_LIKE
 }
