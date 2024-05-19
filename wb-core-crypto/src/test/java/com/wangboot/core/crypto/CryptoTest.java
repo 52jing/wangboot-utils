@@ -38,12 +38,14 @@ public class CryptoTest {
         new RSAPublicProvider(
             Base64.encode(pair1.getPrivate().getEncoded()),
             Base64.encode(pair1.getPublic().getEncoded()));
+    Assertions.assertEquals("", provider1.encrypt(null));
     String data = RandomUtil.randomString(30);
     String encrypted = provider1.encrypt(data.getBytes(StandardCharsets.UTF_8));
     byte[] decrypted = provider2.decrypt(encrypted);
     Assertions.assertEquals(data, new String(decrypted, StandardCharsets.UTF_8));
     Assertions.assertEquals(0, provider2.decrypt("").length);
     // 公钥加密，私钥解密
+    Assertions.assertEquals("", provider2.encrypt(null));
     encrypted = provider2.encrypt(data.getBytes(StandardCharsets.UTF_8));
     decrypted = provider1.decrypt(encrypted);
     Assertions.assertEquals(data, new String(decrypted, StandardCharsets.UTF_8));
@@ -59,11 +61,13 @@ public class CryptoTest {
         new SM2PublicProvider(
             Base64.encode(pair2.getPrivate().getEncoded()),
             Base64.encode(pair2.getPublic().getEncoded()));
+    Assertions.assertEquals("", provider3.encrypt(null));
     encrypted = provider3.encrypt(data.getBytes(StandardCharsets.UTF_8));
     decrypted = provider4.decrypt(encrypted);
     Assertions.assertEquals(data, new String(decrypted, StandardCharsets.UTF_8));
     Assertions.assertEquals(0, provider4.decrypt("").length);
     // 公钥加密，私钥解密
+    Assertions.assertEquals("", provider4.encrypt(null));
     encrypted = provider4.encrypt(data.getBytes(StandardCharsets.UTF_8));
     decrypted = provider3.decrypt(encrypted);
     Assertions.assertEquals(data, new String(decrypted, StandardCharsets.UTF_8));
@@ -78,12 +82,14 @@ public class CryptoTest {
         new AESRSAPublicProvider(
             Base64.encode(pair1.getPrivate().getEncoded()),
             Base64.encode(pair1.getPublic().getEncoded()));
+    Assertions.assertEquals("", provider5.encrypt(null));
     encrypted = provider5.encrypt(data.getBytes(StandardCharsets.UTF_8));
     provider6.setKey(provider5.getKey());
     decrypted = provider6.decrypt(encrypted);
     Assertions.assertEquals(data, new String(decrypted, StandardCharsets.UTF_8));
     Assertions.assertEquals(0, provider6.decrypt("").length);
     // 公钥加密，私钥解密
+    Assertions.assertEquals("", provider6.encrypt(null));
     encrypted = provider6.encrypt(data.getBytes(StandardCharsets.UTF_8));
     provider5.setKey(provider6.getKey());
     decrypted = provider5.decrypt(encrypted);
@@ -99,12 +105,14 @@ public class CryptoTest {
         new AESSM2PublicProvider(
             Base64.encode(pair2.getPrivate().getEncoded()),
             Base64.encode(pair2.getPublic().getEncoded()));
+    Assertions.assertEquals("", provider7.encrypt(null));
     encrypted = provider7.encrypt(data.getBytes(StandardCharsets.UTF_8));
     provider8.setKey(provider7.getKey());
     decrypted = provider8.decrypt(encrypted);
     Assertions.assertEquals(data, new String(decrypted, StandardCharsets.UTF_8));
     Assertions.assertEquals(0, provider8.decrypt("").length);
     // 公钥加密，私钥解密
+    Assertions.assertEquals("", provider8.encrypt(null));
     encrypted = provider8.encrypt(data.getBytes(StandardCharsets.UTF_8));
     provider7.setKey(provider8.getKey());
     decrypted = provider7.decrypt(encrypted);
@@ -127,6 +135,7 @@ public class CryptoTest {
             Base64.encode(pairRsa.getPrivate().getEncoded()),
             Base64.encode(pairRsa.getPublic().getEncoded()));
     // 加密
+    Assertions.assertNull(processor.encryptDataToBody(mode, null));
     CryptoBody body = processor.encryptDataToBody(mode, obj);
     Assertions.assertNotNull(body);
     Assertions.assertTrue(body.getJsondata().length() > 0);

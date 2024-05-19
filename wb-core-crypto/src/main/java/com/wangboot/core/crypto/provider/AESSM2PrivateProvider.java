@@ -1,9 +1,9 @@
 package com.wangboot.core.crypto.provider;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import java.nio.charset.StandardCharsets;
-import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
+import java.util.Objects;
 
 /**
  * AES SM2加解密<br>
@@ -24,7 +24,10 @@ public class AESSM2PrivateProvider extends AbstractAESProvider {
   }
 
   @Override
-  public String encrypt(@NonNull byte[] bytes) {
+  public String encrypt(byte[] bytes) {
+    if (Objects.isNull(bytes) || bytes.length == 0) {
+      return "";
+    }
     // 生成随机 AES 密钥
     byte[] key = this.generateSymmetricKey();
     // 使用 Base64 加密密钥
@@ -33,10 +36,9 @@ public class AESSM2PrivateProvider extends AbstractAESProvider {
     return this.createAES(key).encryptBase64(bytes);
   }
 
-  @NonNull
   @Override
   public byte[] decrypt(String data) {
-    if (StringUtils.hasText(this.getKey()) && StringUtils.hasText(data)) {
+    if (StrUtil.isNotBlank(this.getKey()) && StrUtil.isNotBlank(data)) {
       // 使用 SM2 解密 AES 密钥
       byte[] aesKey = this.sm2PrivateProvider.decrypt(this.getKey());
       // AES 解密

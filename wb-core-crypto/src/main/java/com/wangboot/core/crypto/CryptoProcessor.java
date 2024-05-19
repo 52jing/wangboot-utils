@@ -1,5 +1,7 @@
 package com.wangboot.core.crypto;
 
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,10 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import org.springframework.lang.NonNull;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.StringUtils;
 
 /**
  * 加解密处理器
@@ -34,17 +32,17 @@ public class CryptoProcessor {
   private final byte[] publicKeyBytes;
   private final Map<String, IAsymmetricCryptoProvider> cryptoProviderMap = new HashMap<>();
 
-  public CryptoProcessor(
-      @NonNull ObjectMapper objectMapper, @NonNull String privateKey, @NonNull String publicKey) {
+  public CryptoProcessor(ObjectMapper objectMapper, String privateKey, String publicKey) {
     this.objectMapper = objectMapper;
     this.privateKeyBytes = SecureUtil.decode(privateKey);
     this.publicKeyBytes = SecureUtil.decode(publicKey);
   }
 
   /** 加密响应数据 */
-  @Nullable
-  public CryptoBody encryptDataToBody(String mode, @NonNull Object data)
-      throws JsonProcessingException {
+  public CryptoBody encryptDataToBody(String mode, Object data) throws JsonProcessingException {
+    if (Objects.isNull(data)) {
+      return null;
+    }
     // 获取提供者
     IAsymmetricCryptoProvider provider = this.getAsymmetricCryptoProvider(mode);
     if (Objects.isNull(provider)) {
@@ -58,20 +56,19 @@ public class CryptoProcessor {
       key = ((IHybridCryptoProvider) provider).getKey();
     }
     body.setId(key);
-    body.setMode(Base64Utils.encodeToString(mode.getBytes(StandardCharsets.UTF_8)));
+    body.setMode(Base64.encode(mode.getBytes(StandardCharsets.UTF_8)));
     return body;
   }
 
   /** 解密请求数据 */
-  @NonNull
-  public byte[] decryptDataFromBytes(@NonNull byte[] bytes) throws IOException {
-    if (bytes.length <= 0) {
+  public byte[] decryptDataFromBytes(byte[] bytes) throws IOException {
+    if (Objects.isNull(bytes) || bytes.length <= 0) {
       return new byte[0];
     }
     // 解析对象
     CryptoBody body = this.objectMapper.readValue(bytes, CryptoBody.class);
     // 获取模式
-    String mode = new String(Base64Utils.decodeFromString(body.getMode()));
+    String mode = Base64.decodeStr(body.getMode());
     // 获取提供者
     IAsymmetricCryptoProvider provider = this.getAsymmetricCryptoProvider(mode);
     if (Objects.isNull(provider)) {
@@ -86,9 +83,8 @@ public class CryptoProcessor {
   }
 
   /** 加密字段 */
-  @NonNull
-  public String encryptString(String mode, @NonNull String data) {
-    if (!StringUtils.hasText(data)) {
+  public String encryptString(String mode, String data) {
+    if (StrUtil.isBlank(data)) {
       return "";
     }
     // 获取非对称解密提供者
@@ -101,9 +97,8 @@ public class CryptoProcessor {
   }
 
   /** 解密字段 */
-  @NonNull
-  public String decryptString(String mode, @NonNull String data) {
-    if (!StringUtils.hasText(data)) {
+  public String decryptString(String mode, String data) {
+    if (StrUtil.isBlank(data)) {
       return "";
     }
     // 获取非对称解密提供者
@@ -116,7 +111,6 @@ public class CryptoProcessor {
   }
 
   /** 获取非对称加解密提供者 */
-  @Nullable
   public IAsymmetricCryptoProvider getAsymmetricCryptoProvider(String mode) {
     if (this.cryptoProviderMap.containsKey(mode)) {
       return this.cryptoProviderMap.get(mode);

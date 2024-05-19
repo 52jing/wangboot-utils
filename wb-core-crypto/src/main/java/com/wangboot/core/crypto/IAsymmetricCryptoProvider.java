@@ -1,7 +1,5 @@
 package com.wangboot.core.crypto;
 
-import org.springframework.lang.NonNull;
-
 /**
  * 非对称加解密提供者
  *
@@ -10,9 +8,8 @@ import org.springframework.lang.NonNull;
 public interface IAsymmetricCryptoProvider {
 
   /** 加密 */
-  String encrypt(@NonNull byte[] bytes);
+  String encrypt(byte[] bytes);
 
   /** 解密 */
-  @NonNull
   byte[] decrypt(String data);
 }

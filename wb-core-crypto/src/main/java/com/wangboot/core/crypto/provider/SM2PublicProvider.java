@@ -1,12 +1,12 @@
 package com.wangboot.core.crypto.provider;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.SM2;
 import com.wangboot.core.crypto.IAsymmetricCryptoProvider;
 import java.util.Base64;
-import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
+import java.util.Objects;
 
 /**
  * SM2 公钥加密
@@ -25,14 +25,16 @@ public class SM2PublicProvider implements IAsymmetricCryptoProvider {
   }
 
   @Override
-  public String encrypt(@NonNull byte[] bytes) {
+  public String encrypt(byte[] bytes) {
+    if (Objects.isNull(bytes) || bytes.length == 0) {
+      return "";
+    }
     return this.sm2.encryptBase64(bytes, KeyType.PublicKey);
   }
 
   @Override
-  @NonNull
   public byte[] decrypt(String data) {
-    if (!StringUtils.hasText(data)) {
+    if (StrUtil.isBlank(data)) {
       return new byte[0];
     }
     return Base64.getDecoder().decode(data);

@@ -1,12 +1,12 @@
 package com.wangboot.core.crypto.provider;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import com.wangboot.core.crypto.IAsymmetricCryptoProvider;
 import java.util.Base64;
-import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
+import java.util.Objects;
 
 /**
  * RSA 私钥加密解密
@@ -26,14 +26,16 @@ public class RSAPrivateProvider implements IAsymmetricCryptoProvider {
   }
 
   @Override
-  public String encrypt(@NonNull byte[] bytes) {
+  public String encrypt(byte[] bytes) {
+    if (Objects.isNull(bytes) || bytes.length == 0) {
+      return "";
+    }
     return this.rsa.encryptBase64(bytes, KeyType.PrivateKey);
   }
 
   @Override
-  @NonNull
   public byte[] decrypt(String data) {
-    if (!StringUtils.hasText(data)) {
+    if (StrUtil.isBlank(data)) {
       return new byte[0];
     }
     return this.rsa.decrypt(Base64.getDecoder().decode(data), KeyType.PrivateKey);

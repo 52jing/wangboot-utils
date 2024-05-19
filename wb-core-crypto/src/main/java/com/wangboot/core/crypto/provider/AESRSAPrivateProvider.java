@@ -1,9 +1,9 @@
 package com.wangboot.core.crypto.provider;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import java.nio.charset.StandardCharsets;
-import org.springframework.lang.NonNull;
-import org.springframework.util.StringUtils;
+import java.util.Objects;
 
 /**
  * AES RSA私钥加解密<br>
@@ -24,7 +24,10 @@ public class AESRSAPrivateProvider extends AbstractAESProvider {
   }
 
   @Override
-  public String encrypt(@NonNull byte[] bytes) {
+  public String encrypt(byte[] bytes) {
+    if (Objects.isNull(bytes) || bytes.length == 0) {
+      return "";
+    }
     // 生成随机 AES 密钥
     byte[] key = this.generateSymmetricKey();
     // 使用 RSA 加密密钥
@@ -34,9 +37,8 @@ public class AESRSAPrivateProvider extends AbstractAESProvider {
   }
 
   @Override
-  @NonNull
   public byte[] decrypt(String data) {
-    if (StringUtils.hasText(this.getKey()) && StringUtils.hasText(data)) {
+    if (StrUtil.isNotBlank(this.getKey()) && StrUtil.isNotBlank(data)) {
       // 使用 RSA 解密 AES 密钥
       byte[] aesKey = this.rsaPrivateProvider.decrypt(this.getKey());
       // 使用 AES 解密

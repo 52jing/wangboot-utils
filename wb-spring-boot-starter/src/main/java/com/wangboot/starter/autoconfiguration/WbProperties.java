@@ -65,9 +65,6 @@ public class WbProperties {
   /** 线程池配置 */
   @NestedConfigurationProperty @Valid private ThreadConfig threads = new ThreadConfig();
 
-  /** 请求限速配置 */
-  @NestedConfigurationProperty @Valid private RateLimit rateLimit = new RateLimit();
-
   /** 组件 */
   private Components components = new Components();
 
@@ -126,21 +123,6 @@ public class WbProperties {
     /** 线程活跃时间 */
     @Min(1)
     private int keepAliveSeconds = 60;
-  }
-
-  @Data
-  @Validated
-  public static class RateLimit {
-    /** 是否启用 */
-    private boolean enabled = false;
-
-    /** 限制数量 */
-    @Min(0)
-    private long limitThreshold = 60L;
-
-    /** 计数周期时间（秒） */
-    @Min(0)
-    private long periodSeconds = 60L;
   }
 
   /** 验证码 */
